@@ -1,54 +1,36 @@
+import { useEffect, useState } from 'react'
 import ProductCard from '../components/ProductCard'
+import { supabase } from '../services/supabaseClient'
 import '../styles/home.css'
 
-const mockProducts = [
-  {
-    id: 1,
-    nome: 'Sofá 2 lugares retrô',
-    descricao:
-      'Sofá confortável em excelente estado, tecido de linho azul petróleo, ideal para sala compacta.',
-    categoria: 'Venda',
-    preco: 680,
-    imagemUrl:
-      'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=900&q=80',
-    status: 'Disponível',
-  },
-  {
-    id: 2,
-    nome: 'Coleção de livros infantis',
-    descricao:
-      'Kit com 18 livros ilustrados para crianças de 4 a 8 anos. Todos higienizados e prontos para uso.',
-    categoria: 'Doação',
-    preco: 0,
-    imagemUrl:
-      'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=900&q=80',
-    status: 'Disponível',
-  },
-  {
-    id: 3,
-    nome: 'Bicicleta aro 26 urbana',
-    descricao:
-      'Bicicleta com cestinha frontal e marchas revisadas recentemente. Possui pequenos sinais de uso.',
-    categoria: 'Venda',
-    preco: 540,
-    imagemUrl:
-      'https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&w=900&q=80',
-    status: 'Reservado',
-  },
-  {
-    id: 4,
-    nome: 'Mesa de escritório compacta',
-    descricao:
-      'Mesa de madeira clara com ótimo espaço para notebook e material de estudo, perfeita para home office.',
-    categoria: 'Venda',
-    preco: 320,
-    imagemUrl:
-      'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=900&q=80',
-    status: 'Disponível',
-  },
-]
-
 function Home() {
+  const [produtos, setProdutos] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    const fetchProdutos = async () => {
+      setIsLoading(true)
+      setError(null)
+
+      const { data, error: fetchError } = await supabase
+        .from('produtos')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (fetchError) {
+        setError('Não foi possível carregar os produtos no momento. Tente novamente em instantes.')
+        setProdutos([])
+      } else {
+        setProdutos(data ?? [])
+      }
+
+      setIsLoading(false)
+    }
+
+    fetchProdutos()
+  }, [])
+
   return (
     <main className="home-page">
       <header className="home-hero">
@@ -60,11 +42,31 @@ function Home() {
         </p>
       </header>
 
-      <section className="products-grid" aria-label="Lista de produtos disponíveis">
-        {mockProducts.map((item) => (
-          <ProductCard key={item.id} {...item} />
-        ))}
-      </section>
+      {isLoading && (
+        <section className="home-feedback" role="status" aria-live="polite" aria-label="Carregando produtos">
+          <div className="loading-spinner" aria-hidden="true" />
+          <p>Carregando produtos...</p>
+        </section>
+      )}
+
+      {!isLoading && error && (
+        <section className="home-feedback home-feedback--error" role="alert">
+          <p>{error}</p>
+        </section>
+      )}
+
+      {!isLoading && !error && (
+        <section className="products-grid" aria-label="Lista de produtos disponíveis">
+          {produtos.length > 0 ? (
+            produtos.map((item) => <ProductCard key={item.id} {...item} />)
+          ) : (
+            <article className="home-empty-state">
+              <h2>Nenhum produto publicado ainda</h2>
+              <p>Assim que novos itens forem cadastrados, eles aparecerão aqui.</p>
+            </article>
+          )}
+        </section>
+      )}
     </main>
   )
 }
