@@ -30,7 +30,8 @@ function AdminDashboard() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [formData, setFormData] = useState(INITIAL_FORM)
-  const [selectedImage, setSelectedImage] = useState(null)
+  const [selectedImages, setSelectedImages] = useState([])
+  const [editingProductId, setEditingProductId] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [actionLoadingId, setActionLoadingId] = useState(null)
   const [actionMessage, setActionMessage] = useState('')
@@ -55,6 +56,12 @@ function AdminDashboard() {
     fetchProdutos()
   }, [])
 
+  const resetForm = () => {
+    setFormData(INITIAL_FORM)
+    setSelectedImages([])
+    setEditingProductId(null)
+  }
+
   const handleLogout = async () => {
     await supabase.auth.signOut()
     navigate('/login', { replace: true })
@@ -63,6 +70,23 @@ function AdminDashboard() {
   const handleFormChange = (event) => {
     const { name, value, type, checked } = event.target
     setFormData((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }))
+  }
+
+  const handleEditProduct = (product) => {
+    setEditingProductId(product.id)
+    setSelectedImages([])
+    setFormData({
+      nome: product.nome ?? '',
+      descricao: product.descricao ?? '',
+      preco: product.preco ?? '',
+      categoria: product.categoria ?? 'Venda',
+      subcategoria: product.subcategoria ?? '',
+      estado_uso: product.estado_uso ?? 'Bom estado',
+      motivo_desapego: product.motivo_desapego ?? '',
+      is_feito_a_mao: Boolean(product.is_feito_a_mao),
+      dimensoes: product.dimensoes ?? '',
+    })
+    setActionMessage(`Editando produto: ${product.nome}`)
   }
 
   const handleToggleStatus = async (product) => {
@@ -90,61 +114,110 @@ function AdminDashboard() {
       setActionMessage('Não foi possível excluir o produto.')
     } else {
       setProdutos((prev) => prev.filter((item) => item.id !== productId))
+      if (editingProductId === productId) {
+        resetForm()
+      }
       setActionMessage('Produto excluído com sucesso.')
     }
 
     setActionLoadingId(null)
   }
 
-  const handleCreateProduct = async (event) => {
+  const uploadImages = async () => {
+    if (!selectedImages.length) {
+      return null
+    }
+
+    const urls = []
+
+    for (const imageFile of selectedImages) {
+      const extension = imageFile.name.split('.').pop()
+      const safeBaseName = imageFile.name.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9-_]/g, '-')
+      const filePath = `produtos/${Date.now()}-${safeBaseName}.${extension}`
+
+      const { error: uploadError } = await supabase.storage.from('fotos_produtos').upload(filePath, imageFile, {
+        cacheControl: '3600',
+        upsert: false,
+      })
+
+      if (uploadError) {
+        throw new Error('Erro ao enviar uma das imagens. Verifique os arquivos e tente novamente.')
+      }
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from('fotos_produtos').getPublicUrl(filePath)
+
+      urls.push(publicUrl)
+    }
+
+    return urls
+  }
+
+  const handleSubmitProduct = async (event) => {
     event.preventDefault()
     setIsSubmitting(true)
     setActionMessage('')
 
-    if (!selectedImage) {
-      setActionMessage('Selecione uma imagem para cadastrar o produto.')
-      setIsSubmitting(false)
-      return
+    try {
+      const uploadedUrls = await uploadImages()
+      const currentProduct = produtos.find((product) => product.id === editingProductId)
+
+      if (!editingProductId && !uploadedUrls?.length) {
+        setActionMessage('Selecione ao menos uma imagem para cadastrar o produto.')
+        setIsSubmitting(false)
+        return
+      }
+
+      const payload = {
+        ...formData,
+        preco: formData.preco === '' ? null : Number(formData.preco),
+      }
+
+      if (uploadedUrls?.length) {
+        payload.fotos = uploadedUrls
+      } else if (editingProductId && currentProduct?.fotos) {
+        payload.fotos = currentProduct.fotos
+      }
+
+      if (editingProductId) {
+        const { data: updatedProduct, error: updateError } = await supabase
+          .from('produtos')
+          .update(payload)
+          .eq('id', editingProductId)
+          .select('*')
+          .single()
+
+        if (updateError) {
+          setActionMessage('Não foi possível atualizar o produto.')
+          setIsSubmitting(false)
+          return
+        }
+
+        setProdutos((prev) => prev.map((item) => (item.id === editingProductId ? updatedProduct : item)))
+        setActionMessage('Produto atualizado com sucesso.')
+        resetForm()
+        setIsSubmitting(false)
+        return
+      }
+
+      payload.status = 'Disponível'
+
+      const { data: insertedProduct, error: insertError } = await supabase.from('produtos').insert(payload).select('*').single()
+
+      if (insertError) {
+        setActionMessage('Produto salvo parcialmente: imagens enviadas, mas ocorreu erro ao inserir no banco.')
+        setIsSubmitting(false)
+        return
+      }
+
+      setProdutos((prev) => [insertedProduct, ...prev])
+      resetForm()
+      setActionMessage('Produto cadastrado com sucesso.')
+    } catch (uploadError) {
+      setActionMessage(uploadError.message)
     }
 
-    const extension = selectedImage.name.split('.').pop()
-    const safeBaseName = selectedImage.name.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9-_]/g, '-')
-    const filePath = `produtos/${Date.now()}-${safeBaseName}.${extension}`
-
-    const { error: uploadError } = await supabase.storage.from('fotos_produtos').upload(filePath, selectedImage, {
-      cacheControl: '3600',
-      upsert: false,
-    })
-
-    if (uploadError) {
-      setActionMessage('Erro ao enviar imagem. Verifique o arquivo e tente novamente.')
-      setIsSubmitting(false)
-      return
-    }
-
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from('fotos_produtos').getPublicUrl(filePath)
-
-    const payload = {
-      ...formData,
-      preco: formData.preco === '' ? null : Number(formData.preco),
-      fotos: [publicUrl],
-      status: 'Disponível',
-    }
-
-    const { data: insertedProduct, error: insertError } = await supabase.from('produtos').insert(payload).select('*').single()
-
-    if (insertError) {
-      setActionMessage('Produto salvo parcialmente: imagem enviada, mas ocorreu erro ao inserir no banco.')
-      setIsSubmitting(false)
-      return
-    }
-
-    setProdutos((prev) => [insertedProduct, ...prev])
-    setFormData(INITIAL_FORM)
-    setSelectedImage(null)
-    setActionMessage('Produto cadastrado com sucesso.')
     setIsSubmitting(false)
   }
 
@@ -190,6 +263,9 @@ function AdminDashboard() {
                     </div>
 
                     <div className="admin-product-card__actions">
+                      <button type="button" onClick={() => handleEditProduct(product)} disabled={isActionLoading}>
+                        Editar
+                      </button>
                       <button type="button" onClick={() => handleToggleStatus(product)} disabled={isActionLoading}>
                         {isReserved ? 'Marcar como Disponível' : 'Marcar como Reservado'}
                       </button>
@@ -210,9 +286,9 @@ function AdminDashboard() {
         </article>
 
         <article className="admin-panel">
-          <h2>Novo Produto</h2>
+          <h2>{editingProductId ? 'Editar Produto' : 'Novo Produto'}</h2>
 
-          <form className="admin-form" onSubmit={handleCreateProduct}>
+          <form className="admin-form" onSubmit={handleSubmitProduct}>
             <label htmlFor="nome">Nome</label>
             <input id="nome" name="nome" value={formData.nome} onChange={handleFormChange} required />
 
@@ -259,14 +335,15 @@ function AdminDashboard() {
             <label htmlFor="dimensoes">Dimensões</label>
             <input id="dimensoes" name="dimensoes" value={formData.dimensoes} onChange={handleFormChange} />
 
-            <label htmlFor="imagem">Imagem do produto</label>
+            <label htmlFor="imagem">Fotos do produto</label>
             <input
               id="imagem"
               name="imagem"
               type="file"
               accept="image/*"
-              onChange={(event) => setSelectedImage(event.target.files?.[0] ?? null)}
-              required
+              multiple
+              onChange={(event) => setSelectedImages(Array.from(event.target.files ?? []))}
+              required={!editingProductId}
             />
 
             <label className="admin-checkbox" htmlFor="is_feito_a_mao">
@@ -281,8 +358,20 @@ function AdminDashboard() {
             </label>
 
             <button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Salvando produto...' : 'Salvar produto'}
+              {isSubmitting
+                ? editingProductId
+                  ? 'Atualizando produto...'
+                  : 'Salvando produto...'
+                : editingProductId
+                  ? 'Atualizar produto'
+                  : 'Salvar produto'}
             </button>
+
+            {editingProductId && (
+              <button type="button" className="admin-ghost-button" onClick={resetForm}>
+                Cancelar edição
+              </button>
+            )}
           </form>
         </article>
       </section>

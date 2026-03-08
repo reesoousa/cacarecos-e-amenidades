@@ -83,8 +83,8 @@ function Home() {
   return (
     <main className="home-page">
       <header className="home-hero">
-        <p className="home-hero__eyebrow">Desapegos com propósito</p>
-        <h1>Venda de Garagem: Renan & Daisy</h1>
+        <p className="home-hero__eyebrow">Venda de Garagem</p>
+        <h1>Cacarecos e Amenidades</h1>
         <p className="home-hero__description">
           Nossa lojinha digital para desapegos e doações. Explore os itens, encontre algo que goste e reserve direto
           com a gente pelo WhatsApp.
@@ -123,19 +123,26 @@ function Home() {
             </div>
 
             <div className="filters-secondary">
-              <label htmlFor="subcategory-filter">Subcategoria</label>
-              <select
-                id="subcategory-filter"
-                value={selectedSubcategory}
-                onChange={(event) => setSelectedSubcategory(event.target.value)}
-              >
-                <option value="todas">Todas</option>
+              <p>Subcategorias</p>
+              <div className="subcategories-chips hide-scrollbar" role="list" aria-label="Subcategorias">
+                <button
+                  type="button"
+                  className={`subcategory-chip ${selectedSubcategory === 'todas' ? 'is-active' : ''}`}
+                  onClick={() => setSelectedSubcategory('todas')}
+                >
+                  Todas
+                </button>
                 {subcategories.map((subcat) => (
-                  <option key={subcat} value={subcat}>
+                  <button
+                    key={subcat}
+                    type="button"
+                    className={`subcategory-chip ${selectedSubcategory === subcat ? 'is-active' : ''}`}
+                    onClick={() => setSelectedSubcategory(subcat)}
+                  >
                     {subcat}
-                  </option>
+                  </button>
                 ))}
-              </select>
+              </div>
             </div>
           </section>
 

@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import Home from './pages/Home'
 import AdminDashboard from './pages/AdminDashboard'
 import Login from './pages/Login'
 import ProductDetails from './pages/ProductDetails'
+import Footer from './components/Footer'
 import { supabase } from './services/supabaseClient'
 
 function ProtectedRoute({ children, session, isAuthLoading }) {
@@ -44,6 +45,15 @@ function PublicOnlyRoute({ children, session, isAuthLoading }) {
   return children
 }
 
+function PublicLayout() {
+  return (
+    <>
+      <Outlet />
+      <Footer />
+    </>
+  )
+}
+
 function App() {
   const [session, setSession] = useState(null)
   const [isAuthLoading, setIsAuthLoading] = useState(true)
@@ -79,8 +89,11 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/produto/:id" element={<ProductDetails />} />
+      <Route element={<PublicLayout />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/produto/:id" element={<ProductDetails />} />
+      </Route>
+
       <Route
         path="/login"
         element={
