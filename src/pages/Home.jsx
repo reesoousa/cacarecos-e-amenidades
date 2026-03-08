@@ -1,12 +1,40 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import ProductCard from '../components/ProductCard'
 import { supabase } from '../services/supabaseClient'
 import '../styles/home.css'
+
+const PRIMARY_TABS = [
+  { key: 'todos', label: 'Todos' },
+  { key: 'venda', label: 'Venda' },
+  { key: 'doacao', label: 'Doação' },
+]
+
+const normalizeText = (value = '') =>
+  value
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+
+const getCategoryType = (categoria) => {
+  const normalized = normalizeText(categoria)
+
+  if (normalized.includes('doacao')) {
+    return 'doacao'
+  }
+
+  if (normalized.includes('venda')) {
+    return 'venda'
+  }
+
+  return 'outros'
+}
 
 function Home() {
   const [produtos, setProdutos] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [activeTab, setActiveTab] = useState('todos')
+  const [selectedSubcategory, setSelectedSubcategory] = useState('todas')
 
   useEffect(() => {
     const fetchProdutos = async () => {
@@ -31,14 +59,35 @@ function Home() {
     fetchProdutos()
   }, [])
 
+  const subcategories = useMemo(() => {
+    const base = activeTab === 'todos' ? produtos : produtos.filter((item) => getCategoryType(item.categoria) === activeTab)
+
+    return [...new Set(base.map((item) => item.subcategoria).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'))
+  }, [activeTab, produtos])
+
+  useEffect(() => {
+    if (selectedSubcategory !== 'todas' && !subcategories.includes(selectedSubcategory)) {
+      setSelectedSubcategory('todas')
+    }
+  }, [selectedSubcategory, subcategories])
+
+  const filteredProducts = useMemo(() => {
+    return produtos.filter((item) => {
+      const matchesTab = activeTab === 'todos' || getCategoryType(item.categoria) === activeTab
+      const matchesSubcategory = selectedSubcategory === 'todas' || item.subcategoria === selectedSubcategory
+
+      return matchesTab && matchesSubcategory
+    })
+  }, [activeTab, produtos, selectedSubcategory])
+
   return (
     <main className="home-page">
       <header className="home-hero">
-        <p className="home-hero__eyebrow">Venda de garagem digital</p>
-        <h1>Cacarecos & Amenidades</h1>
+        <p className="home-hero__eyebrow">Desapegos com propósito</p>
+        <h1>Venda de Garagem: Renan & Daisy</h1>
         <p className="home-hero__description">
-          Um espaço para desapegar com carinho: venda ou doe itens em bom estado para quem realmente vai
-          aproveitar.
+          Nossa lojinha digital para desapegos e doações. Explore os itens, encontre algo que goste e reserve direto
+          com a gente pelo WhatsApp.
         </p>
       </header>
 
@@ -56,16 +105,51 @@ function Home() {
       )}
 
       {!isLoading && !error && (
-        <section className="products-grid" aria-label="Lista de produtos disponíveis">
-          {produtos.length > 0 ? (
-            produtos.map((item) => <ProductCard key={item.id} {...item} />)
-          ) : (
-            <article className="home-empty-state">
-              <h2>Nenhum produto publicado ainda</h2>
-              <p>Assim que novos itens forem cadastrados, eles aparecerão aqui.</p>
-            </article>
-          )}
-        </section>
+        <>
+          <section className="filters-bar" aria-label="Filtros de busca">
+            <div className="filters-tabs" role="tablist" aria-label="Tipo de anúncio">
+              {PRIMARY_TABS.map((tab) => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  className={`filters-tab ${activeTab === tab.key ? 'is-active' : ''}`}
+                  onClick={() => setActiveTab(tab.key)}
+                  role="tab"
+                  aria-selected={activeTab === tab.key}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="filters-secondary">
+              <label htmlFor="subcategory-filter">Subcategoria</label>
+              <select
+                id="subcategory-filter"
+                value={selectedSubcategory}
+                onChange={(event) => setSelectedSubcategory(event.target.value)}
+              >
+                <option value="todas">Todas</option>
+                {subcategories.map((subcat) => (
+                  <option key={subcat} value={subcat}>
+                    {subcat}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </section>
+
+          <section className="products-grid" aria-label="Lista de produtos disponíveis">
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map((item) => <ProductCard key={item.id} {...item} />)
+            ) : (
+              <article className="home-empty-state">
+                <h2>Nenhum item com esse filtro</h2>
+                <p>Tente outra categoria ou subcategoria para encontrar novos itens.</p>
+              </article>
+            )}
+          </section>
+        </>
       )}
     </main>
   )
