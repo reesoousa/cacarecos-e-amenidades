@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import Home from './pages/Home'
 import AdminDashboard from './pages/AdminDashboard'
 import Login from './pages/Login'
+import ProductDetails from './pages/ProductDetails'
 
 function ProtectedRoute({ children }) {
   const isAuthenticated = Boolean(localStorage.getItem('ca_auth_token'))
@@ -17,6 +18,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path="/produto/:id" element={<ProductDetails />} />
       <Route path="/login" element={<Login />} />
       <Route
         path="/admin"
