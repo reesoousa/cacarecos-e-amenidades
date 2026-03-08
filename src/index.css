@@ -1,0 +1,41 @@
+:root {
+  color-scheme: dark;
+  --bg: #090b12;
+  --bg-elevated: #101522;
+  --surface: #151b2c;
+  --surface-soft: #1c2538;
+  --text-main: #f8fafc;
+  --text-muted: #cbd5e1;
+  --brand: #7c3aed;
+  --brand-strong: #6d28d9;
+  --success: #86efac;
+  --success-bg: #10361f;
+  --warning: #fecaca;
+  --warning-bg: #4c1d1d;
+  --border: #273449;
+  --shadow: 0 20px 40px rgba(2, 8, 23, 0.55);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 12% -8%, rgba(124, 58, 237, 0.28), transparent 38%),
+    radial-gradient(circle at 85% 10%, rgba(14, 165, 233, 0.2), transparent 30%),
+    var(--bg);
+  color: var(--text-main);
+  font-family: 'Manrope', 'Segoe UI', sans-serif;
+}
+
+a {
+  color: inherit;
+}
