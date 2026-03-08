@@ -16,9 +16,9 @@ const priceFormatter = new Intl.NumberFormat('pt-BR', {
 function ProductDetails() {
   const { id } = useParams()
   const [produto, setProduto] = useState(null)
-  const [mainImage, setMainImage] = useState(PRODUCT_PLACEHOLDER_IMAGE)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [lightboxImage, setLightboxImage] = useState(null)
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -32,11 +32,6 @@ function ProductDetails() {
         setProduto(null)
       } else {
         setProduto(data)
-        if (Array.isArray(data.fotos) && data.fotos.length > 0) {
-          setMainImage(data.fotos[0])
-        } else {
-          setMainImage(PRODUCT_PLACEHOLDER_IMAGE)
-        }
       }
 
       setIsLoading(false)
@@ -80,6 +75,7 @@ function ProductDetails() {
   const normalizedCategoria = produto.categoria?.toLowerCase()
   const isDonation = normalizedCategoria === 'doação' || normalizedCategoria === 'doacao'
   const hasPrice = typeof produto.preco === 'number' && produto.preco > 0
+  const isReserved = produto.status?.toLowerCase() === 'reservado'
   const priceText = isDonation || !hasPrice ? 'Doação' : priceFormatter.format(produto.preco)
   const waText = encodeURIComponent(`Oi! Vi o item ${produto.nome} e quero reservar.`)
   const whatsappLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${waText}`
@@ -92,22 +88,21 @@ function ProductDetails() {
 
       <section className="product-layout" aria-label="Detalhes do produto">
         <div className="product-gallery">
-          <img src={mainImage} alt={produto.nome} className="product-gallery__main" />
+          <div className="product-gallery-mobile hide-scrollbar" aria-label="Galeria mobile">
+            {galleryImages.map((image, index) => (
+              <button key={`${image}-${index}`} type="button" className="product-gallery-mobile__item" onClick={() => setLightboxImage(image)}>
+                <img src={image} alt={`Foto ${index + 1} de ${produto.nome}`} loading="lazy" />
+              </button>
+            ))}
+          </div>
 
-          {galleryImages.length > 1 && (
-            <div className="product-gallery__thumbs" aria-label="Galeria de fotos">
-              {galleryImages.map((image) => (
-                <button
-                  key={image}
-                  type="button"
-                  className={`product-gallery__thumb ${mainImage === image ? 'is-active' : ''}`}
-                  onClick={() => setMainImage(image)}
-                >
-                  <img src={image} alt={`Foto de ${produto.nome}`} loading="lazy" />
-                </button>
-              ))}
-            </div>
-          )}
+          <div className="product-gallery-desktop" aria-label="Galeria desktop">
+            {galleryImages.map((image, index) => (
+              <button key={`${image}-desk-${index}`} type="button" className="product-gallery-desktop__item" onClick={() => setLightboxImage(image)}>
+                <img src={image} alt={`Foto ${index + 1} de ${produto.nome}`} loading="lazy" />
+              </button>
+            ))}
+          </div>
         </div>
 
         <article className="product-info">
@@ -116,7 +111,7 @@ function ProductDetails() {
           <p className="product-info__price">{priceText}</p>
 
           <div className="product-info__badges">
-            {produto.status?.toLowerCase() === 'reservado' && <span className="badge badge--reserved">Reservado</span>}
+            {isReserved && <span className="badge badge--reserved">Reservado</span>}
             {isDonation && <span className="badge badge--donation">Doação</span>}
             {produto.is_feito_a_mao && <span className="badge badge--handmade">Peça Autoral</span>}
           </div>
@@ -147,21 +142,33 @@ function ProductDetails() {
           </ul>
 
           <a
-            href={produto.status?.toLowerCase() === 'reservado' ? undefined : whatsappLink}
+            href={isReserved ? undefined : whatsappLink}
             target="_blank"
             rel="noreferrer"
-            className={`product-sticky-cta ${produto.status?.toLowerCase() === 'reservado' ? 'is-disabled' : ''}`}
-            aria-disabled={produto.status?.toLowerCase() === 'reservado'}
+            className={`product-whatsapp-cta ${isReserved ? 'is-disabled' : ''}`}
+            aria-disabled={isReserved}
             onClick={(event) => {
-              if (produto.status?.toLowerCase() === 'reservado') {
+              if (isReserved) {
                 event.preventDefault()
               }
             }}
           >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M19.05 4.94A9.94 9.94 0 0 0 12 2a10 10 0 0 0-8.66 15l-1.3 4.76 4.88-1.28A10 10 0 1 0 19.05 4.94ZM12 20.17a8.08 8.08 0 0 1-4.1-1.11l-.3-.18-2.9.76.78-2.82-.2-.3a8.17 8.17 0 1 1 6.72 3.65Zm4.49-6.14c-.25-.12-1.48-.73-1.71-.82-.23-.08-.4-.12-.56.12-.17.25-.65.82-.8.98-.15.17-.3.19-.56.06-.25-.13-1.08-.4-2.05-1.28-.75-.66-1.25-1.47-1.4-1.72-.15-.25-.02-.39.11-.52.12-.12.25-.3.37-.45.13-.15.17-.25.25-.42.08-.16.04-.31-.02-.43-.06-.12-.56-1.35-.77-1.86-.2-.47-.4-.4-.56-.4h-.48c-.16 0-.43.06-.65.31-.23.25-.85.83-.85 2.03s.87 2.37 1 2.53c.12.16 1.68 2.56 4.08 3.6.57.25 1.02.4 1.37.51.57.18 1.1.16 1.52.1.46-.07 1.48-.6 1.69-1.19.21-.58.21-1.08.15-1.18-.06-.1-.23-.16-.48-.29Z" />
+            </svg>
             Reservar via WhatsApp
           </a>
         </article>
       </section>
+
+      {lightboxImage && (
+        <div className="lightbox-overlay" role="dialog" aria-modal="true" aria-label="Visualização ampliada da imagem">
+          <button type="button" className="lightbox-close" onClick={() => setLightboxImage(null)}>
+            Fechar
+          </button>
+          <img src={lightboxImage} alt={`Imagem ampliada de ${produto.nome}`} className="lightbox-image" />
+        </div>
+      )}
     </main>
   )
 }
