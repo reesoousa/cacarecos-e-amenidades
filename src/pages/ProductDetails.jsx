@@ -40,6 +40,24 @@ function ProductDetails() {
     fetchProduct()
   }, [id])
 
+  useEffect(() => {
+    if (!lightboxImage) {
+      return undefined
+    }
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        setLightboxImage(null)
+      }
+    }
+
+    window.addEventListener('keydown', handleEscape)
+
+    return () => {
+      window.removeEventListener('keydown', handleEscape)
+    }
+  }, [lightboxImage])
+
   const galleryImages = useMemo(() => {
     if (!produto || !Array.isArray(produto.fotos) || produto.fotos.length === 0) {
       return [PRODUCT_PLACEHOLDER_IMAGE]
@@ -47,6 +65,10 @@ function ProductDetails() {
 
     return produto.fotos
   }, [produto])
+
+  const featuredImage = galleryImages[0]
+  const secondaryImages = galleryImages.slice(1, 5)
+  const remainingImagesCount = galleryImages.length - 5
 
   if (isLoading) {
     return (
@@ -91,17 +113,41 @@ function ProductDetails() {
           <div className="product-gallery-mobile hide-scrollbar" aria-label="Galeria mobile">
             {galleryImages.map((image, index) => (
               <button key={`${image}-${index}`} type="button" className="product-gallery-mobile__item" onClick={() => setLightboxImage(image)}>
-                <img src={image} alt={`Foto ${index + 1} de ${produto.nome}`} loading="lazy" />
+                <img src={image} alt={`Foto ${index + 1} de ${produto.nome}`} loading="lazy" className="w-full h-full object-cover" />
               </button>
             ))}
           </div>
 
           <div className="product-gallery-desktop" aria-label="Galeria desktop">
-            {galleryImages.map((image, index) => (
-              <button key={`${image}-desk-${index}`} type="button" className="product-gallery-desktop__item" onClick={() => setLightboxImage(image)}>
-                <img src={image} alt={`Foto ${index + 1} de ${produto.nome}`} loading="lazy" />
+            {galleryImages.length === 1 ? (
+              <button type="button" className="product-gallery-desktop__single overflow-hidden" onClick={() => setLightboxImage(featuredImage)}>
+                <img src={featuredImage} alt={`Foto 1 de ${produto.nome}`} loading="lazy" className="w-full h-full object-cover" />
               </button>
-            ))}
+            ) : (
+              <>
+                <button type="button" className="product-gallery-desktop__featured overflow-hidden" onClick={() => setLightboxImage(featuredImage)}>
+                  <img src={featuredImage} alt={`Foto 1 de ${produto.nome}`} loading="lazy" className="w-full h-full object-cover" />
+                </button>
+
+                <div className="product-gallery-desktop__secondary" style={{ '--secondary-rows': secondaryImages.length }}>
+                  {secondaryImages.map((image, index) => {
+                    const isLastVisibleThumb = index === secondaryImages.length - 1 && remainingImagesCount > 0
+
+                    return (
+                      <button
+                        key={`${image}-desk-${index}`}
+                        type="button"
+                        className="product-gallery-desktop__item overflow-hidden"
+                        onClick={() => setLightboxImage(image)}
+                      >
+                        <img src={image} alt={`Foto ${index + 2} de ${produto.nome}`} loading="lazy" className="w-full h-full object-cover" />
+                        {isLastVisibleThumb && <span className="product-gallery-desktop__more">+{remainingImagesCount}</span>}
+                      </button>
+                    )
+                  })}
+                </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -162,11 +208,29 @@ function ProductDetails() {
       </section>
 
       {lightboxImage && (
-        <div className="lightbox-overlay" role="dialog" aria-modal="true" aria-label="Visualização ampliada da imagem">
-          <button type="button" className="lightbox-close" onClick={() => setLightboxImage(null)}>
+        <div
+          className="lightbox-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Visualização ampliada da imagem"
+          onClick={() => setLightboxImage(null)}
+        >
+          <button
+            type="button"
+            className="lightbox-close"
+            onClick={(event) => {
+              event.stopPropagation()
+              setLightboxImage(null)
+            }}
+          >
             Fechar
           </button>
-          <img src={lightboxImage} alt={`Imagem ampliada de ${produto.nome}`} className="lightbox-image" />
+          <img
+            src={lightboxImage}
+            alt={`Imagem ampliada de ${produto.nome}`}
+            className="lightbox-image"
+            onClick={(event) => event.stopPropagation()}
+          />
         </div>
       )}
     </main>

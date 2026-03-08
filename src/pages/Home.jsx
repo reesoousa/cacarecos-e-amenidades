@@ -34,7 +34,6 @@ function Home() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
   const [activeTab, setActiveTab] = useState('todos')
-  const [selectedSubcategory, setSelectedSubcategory] = useState('todas')
 
   useEffect(() => {
     const fetchProdutos = async () => {
@@ -59,26 +58,9 @@ function Home() {
     fetchProdutos()
   }, [])
 
-  const subcategories = useMemo(() => {
-    const base = activeTab === 'todos' ? produtos : produtos.filter((item) => getCategoryType(item.categoria) === activeTab)
-
-    return [...new Set(base.map((item) => item.subcategoria).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'))
-  }, [activeTab, produtos])
-
-  useEffect(() => {
-    if (selectedSubcategory !== 'todas' && !subcategories.includes(selectedSubcategory)) {
-      setSelectedSubcategory('todas')
-    }
-  }, [selectedSubcategory, subcategories])
-
   const filteredProducts = useMemo(() => {
-    return produtos.filter((item) => {
-      const matchesTab = activeTab === 'todos' || getCategoryType(item.categoria) === activeTab
-      const matchesSubcategory = selectedSubcategory === 'todas' || item.subcategoria === selectedSubcategory
-
-      return matchesTab && matchesSubcategory
-    })
-  }, [activeTab, produtos, selectedSubcategory])
+    return produtos.filter((item) => activeTab === 'todos' || getCategoryType(item.categoria) === activeTab)
+  }, [activeTab, produtos])
 
   return (
     <main className="home-page">
@@ -121,29 +103,6 @@ function Home() {
                 </button>
               ))}
             </div>
-
-            <div className="filters-secondary">
-              <p>Subcategorias</p>
-              <div className="subcategories-chips hide-scrollbar" role="list" aria-label="Subcategorias">
-                <button
-                  type="button"
-                  className={`subcategory-chip ${selectedSubcategory === 'todas' ? 'is-active' : ''}`}
-                  onClick={() => setSelectedSubcategory('todas')}
-                >
-                  Todas
-                </button>
-                {subcategories.map((subcat) => (
-                  <button
-                    key={subcat}
-                    type="button"
-                    className={`subcategory-chip ${selectedSubcategory === subcat ? 'is-active' : ''}`}
-                    onClick={() => setSelectedSubcategory(subcat)}
-                  >
-                    {subcat}
-                  </button>
-                ))}
-              </div>
-            </div>
           </section>
 
           <section className="products-grid" aria-label="Lista de produtos disponíveis">
@@ -152,7 +111,7 @@ function Home() {
             ) : (
               <article className="home-empty-state">
                 <h2>Nenhum item com esse filtro</h2>
-                <p>Tente outra categoria ou subcategoria para encontrar novos itens.</p>
+                <p>Tente outra categoria para encontrar novos itens.</p>
               </article>
             )}
           </section>
