@@ -9,10 +9,17 @@ const priceFormatter = new Intl.NumberFormat('pt-BR', {
   minimumFractionDigits: 2,
 })
 
-function ProductCard({ id, nome, preco, categoria, is_feito_a_mao, fotos, status }) {
-  const normalizedCategoria = categoria?.toLowerCase()
+const normalizeText = (value = '') =>
+  value
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+
+function ProductCard({ id, nome, preco, categoria, estado_uso, is_feito_a_mao, fotos, status }) {
+  const normalizedCategoria = normalizeText(categoria)
   const normalizedStatus = status?.toLowerCase()
-  const isDonation = normalizedCategoria === 'doação' || normalizedCategoria === 'doacao'
+  const isDonation = normalizedCategoria.includes('doacao')
+  const isSale = normalizedCategoria.includes('venda')
   const isReserved = normalizedStatus === 'reservado'
   const hasPrice = typeof preco === 'number' && preco > 0
   const priceText = isDonation || !hasPrice ? 'Doação' : priceFormatter.format(preco)
@@ -34,6 +41,13 @@ function ProductCard({ id, nome, preco, categoria, is_feito_a_mao, fotos, status
           <h2 id={`product-title-${id}`} className="product-card__title">
             {nome}
           </h2>
+
+          <div className="product-card__info-tags" aria-label="Categoria e estado de uso">
+            <span className={`product-card__tag ${isDonation ? 'is-donation' : isSale ? 'is-sale' : 'is-default'}`}>
+              {categoria || 'Categoria não informada'}
+            </span>
+            <span className="product-card__tag is-usage">{estado_uso || 'Estado não informado'}</span>
+          </div>
 
           <p className="product-card__price" aria-label={`Preço: ${priceText}`}>
             {priceText}

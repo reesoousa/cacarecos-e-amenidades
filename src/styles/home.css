@@ -259,6 +259,44 @@
   justify-content: space-between;
 }
 
+
+.product-card__info-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.42rem;
+  margin: 0 0 0.7rem;
+}
+
+.product-card__tag {
+  border-radius: 999px;
+  padding: 0.2rem 0.58rem;
+  font-size: 0.73rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+  color: #f4f4f5;
+}
+
+.product-card__tag.is-sale {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+.product-card__tag.is-donation {
+  background: #1f2937;
+  border-color: #22543d;
+}
+
+.product-card__tag.is-default {
+  background: #27272a;
+  border-color: #3f3f46;
+}
+
+.product-card__tag.is-usage {
+  background: #18181b;
+  border-color: #3f3f46;
+  color: #e4e4e7;
+}
+
 .product-card__price,
 .product-info__price {
   margin: 0;

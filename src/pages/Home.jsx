@@ -66,7 +66,7 @@ function Home() {
     <main className="home-page">
       <header className="home-hero">
         <p className="home-hero__eyebrow">Venda de Garagem</p>
-        <h1>Cacarecos e Amenidades</h1>
+        <h1>Cacarecos & Amenidades</h1>
         <p className="home-hero__description">
           Nossa lojinha digital para desapegos e doações. Explore os itens, encontre algo que goste e reserve direto
           com a gente pelo WhatsApp.
