@@ -718,3 +718,31 @@
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+
+.home-banner {
+  margin-top: 1.2rem;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.home-banner picture,
+.home-banner__image,
+.home-banner__skeleton {
+  width: 100%;
+  display: block;
+}
+
+.home-banner__image,
+.home-banner__skeleton {
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+}
+
+@media (min-width: 768px) {
+  .home-banner__image,
+  .home-banner__skeleton {
+    aspect-ratio: 3 / 1;
+  }
+}
