@@ -280,7 +280,7 @@ function ProductDetails() {
         <h2>Você também pode gostar</h2>
 
         {isRecommendationsLoading ? (
-          <div className="recommendations-grid" role="status" aria-live="polite">
+          <div className="recommendations-grid hide-scrollbar" role="status" aria-live="polite">
             {Array.from({ length: 4 }).map((_, index) => (
               <article key={`recommendation-skeleton-${index}`} className="product-card skeleton-card">
                 <Skeleton className="skeleton-card__media" />
@@ -294,7 +294,7 @@ function ProductDetails() {
             ))}
           </div>
         ) : recommendedProducts.length > 0 ? (
-          <div className="recommendations-grid">
+          <div className="recommendations-grid hide-scrollbar">
             {recommendedProducts.map((item) => (
               <ProductCard key={item.id} {...item} />
             ))}
