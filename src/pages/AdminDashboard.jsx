@@ -29,13 +29,13 @@ const BANNER_CONFIG = {
   desktop: {
     key: 'desktop',
     label: 'Banner Desktop',
-    helperText: 'Tamanho recomendado: 1200x400px (Proporção 3:1)',
+    helperText: 'Tamanho recomendado: 1200x300px (4:1)',
     fileName: 'banner_home_desktop',
   },
   mobile: {
     key: 'mobile',
     label: 'Banner Mobile',
-    helperText: 'Tamanho recomendado: 800x1066px (Proporção 3:4)',
+    helperText: 'Tamanho recomendado: 800x800px (1:1)',
     fileName: 'banner_home_mobile',
   },
 }
@@ -441,8 +441,7 @@ function AdminDashboard() {
     <main className="admin-page">
       <header className="admin-header">
         <div>
-          <p className="admin-header__eyebrow">Cacarecos & Amenidades</p>
-          <h1>Painel de Controle</h1>
+          <h1>Cacarecos & Amenidades</h1>
         </div>
         <button type="button" onClick={handleLogout} className="admin-ghost-button">
           Sair
@@ -455,6 +454,53 @@ function AdminDashboard() {
         </p>
       )}
       {error && <p className="admin-feedback admin-feedback--error">{error}</p>}
+
+      <section className="admin-panel admin-banner-section" aria-label="Gestão dos banners da home">
+        <h2>Banner da Home</h2>
+        <div className="admin-banner-grid">
+          {Object.values(BANNER_CONFIG).map((banner) => {
+            const bannerData = bannerImages[banner.key]
+            const previewUrl = bannerData.preview || bannerData.existingUrl
+
+            return (
+              <div key={banner.key} className="admin-banner-block">
+                <p className="admin-image-upload__label">{banner.label}</p>
+                <label
+                  className="admin-dropzone"
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={(event) => {
+                    event.preventDefault()
+                    handleSelectBanner(banner.key, event.dataTransfer?.files)
+                  }}
+                >
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="admin-file-input-hidden"
+                    onChange={(event) => handleSelectBanner(banner.key, event.target.files)}
+                  />
+                  {previewUrl ? (
+                    <img src={previewUrl} alt={`Pré-visualização do ${banner.label}`} className="admin-dropzone__preview" />
+                  ) : (
+                    <span className="admin-dropzone__text">Arraste uma imagem aqui ou clique para selecionar</span>
+                  )}
+                </label>
+                <p className="admin-image-upload__hint">{banner.helperText}</p>
+                <button
+                  type="button"
+                  className="admin-upload-button"
+                  onClick={() => handleUploadBanner(banner.key)}
+                  disabled={bannerUploadLoading[banner.key]}
+                >
+                  {bannerUploadLoading[banner.key] ? 'Salvando banner...' : 'Salvar banner'}
+                </button>
+              </div>
+            )
+          })}
+        </div>
+      </section>
+
+      <div className="admin-section-separator" aria-hidden="true" />
 
       <section className="admin-layout" aria-label="Gestão de produtos">
         <article className="admin-panel">
@@ -643,50 +689,6 @@ function AdminDashboard() {
           </form>
         </article>
 
-        <article className="admin-panel" aria-label="Banner da Home">
-          <h2>Banner da Home</h2>
-          <div className="admin-banner-grid">
-            {Object.values(BANNER_CONFIG).map((banner) => {
-              const bannerData = bannerImages[banner.key]
-              const previewUrl = bannerData.preview || bannerData.existingUrl
-
-              return (
-                <div key={banner.key} className="admin-banner-block">
-                  <p className="admin-image-upload__label">{banner.label}</p>
-                  <label
-                    className="admin-dropzone"
-                    onDragOver={(event) => event.preventDefault()}
-                    onDrop={(event) => {
-                      event.preventDefault()
-                      handleSelectBanner(banner.key, event.dataTransfer?.files)
-                    }}
-                  >
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="admin-file-input-hidden"
-                      onChange={(event) => handleSelectBanner(banner.key, event.target.files)}
-                    />
-                    {previewUrl ? (
-                      <img src={previewUrl} alt={`Pré-visualização do ${banner.label}`} className="admin-dropzone__preview" />
-                    ) : (
-                      <span className="admin-dropzone__text">Arraste uma imagem aqui ou clique para selecionar</span>
-                    )}
-                  </label>
-                  <p className="admin-image-upload__hint">{banner.helperText}</p>
-                  <button
-                    type="button"
-                    className="admin-upload-button"
-                    onClick={() => handleUploadBanner(banner.key)}
-                    disabled={bannerUploadLoading[banner.key]}
-                  >
-                    {bannerUploadLoading[banner.key] ? 'Salvando banner...' : 'Salvar banner'}
-                  </button>
-                </div>
-              )
-            })}
-          </div>
-        </article>
       </section>
     </main>
   )
