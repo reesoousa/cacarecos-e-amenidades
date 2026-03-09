@@ -25,6 +25,21 @@ const INITIAL_FORM = {
   dimensoes: '',
 }
 
+const BANNER_CONFIG = {
+  desktop: {
+    key: 'desktop',
+    label: 'Banner Desktop',
+    helperText: 'Tamanho recomendado: 1200x400px (Proporção 3:1)',
+    fileName: 'banner_home_desktop',
+  },
+  mobile: {
+    key: 'mobile',
+    label: 'Banner Mobile',
+    helperText: 'Tamanho recomendado: 800x1066px (Proporção 3:4)',
+    fileName: 'banner_home_mobile',
+  },
+}
+
 function AdminDashboard() {
   const navigate = useNavigate()
   const fileInputRef = useRef(null)
@@ -39,6 +54,44 @@ function AdminDashboard() {
   const [actionMessage, setActionMessage] = useState('')
   const [actionMessageType, setActionMessageType] = useState('success')
   const [draggedIndex, setDraggedIndex] = useState(null)
+  const [bannerImages, setBannerImages] = useState({
+    desktop: { file: null, preview: '', existingUrl: '' },
+    mobile: { file: null, preview: '', existingUrl: '' },
+  })
+  const [bannerUploadLoading, setBannerUploadLoading] = useState({ desktop: false, mobile: false })
+
+  const getBannerPublicUrl = (fileName) => {
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from('fotos_produtos').getPublicUrl(`banners/${fileName}`)
+
+    return publicUrl
+  }
+
+  const fetchBannerImages = async () => {
+    const { data, error: listError } = await supabase.storage.from('fotos_produtos').list('banners', { limit: 50 })
+
+    if (listError) {
+      return
+    }
+
+    const availableFileNames = new Set((data ?? []).map((item) => item.name))
+
+    setBannerImages((prev) => ({
+      desktop: {
+        ...prev.desktop,
+        existingUrl: availableFileNames.has(BANNER_CONFIG.desktop.fileName)
+          ? `${getBannerPublicUrl(BANNER_CONFIG.desktop.fileName)}?v=${Date.now()}`
+          : '',
+      },
+      mobile: {
+        ...prev.mobile,
+        existingUrl: availableFileNames.has(BANNER_CONFIG.mobile.fileName)
+          ? `${getBannerPublicUrl(BANNER_CONFIG.mobile.fileName)}?v=${Date.now()}`
+          : '',
+      },
+    }))
+  }
 
   const fetchProdutos = async () => {
     setIsLoading(true)
@@ -58,6 +111,7 @@ function AdminDashboard() {
 
   useEffect(() => {
     fetchProdutos()
+    fetchBannerImages()
   }, [])
 
   useEffect(() => {
@@ -214,6 +268,72 @@ function AdminDashboard() {
 
       return prev.filter((image) => image.id !== imageId)
     })
+  }
+
+  const handleSelectBanner = (bannerKey, fileList) => {
+    const [file] = Array.from(fileList ?? [])
+
+    if (!file) {
+      return
+    }
+
+    setBannerImages((prev) => {
+      if (prev[bannerKey]?.preview?.startsWith('blob:')) {
+        URL.revokeObjectURL(prev[bannerKey].preview)
+      }
+
+      return {
+        ...prev,
+        [bannerKey]: {
+          ...prev[bannerKey],
+          file,
+          preview: URL.createObjectURL(file),
+        },
+      }
+    })
+  }
+
+  const handleUploadBanner = async (bannerKey) => {
+    const selectedFile = bannerImages[bannerKey]?.file
+
+    if (!selectedFile) {
+      setFeedback('Selecione uma imagem antes de salvar o banner.', 'error')
+      return
+    }
+
+    setBannerUploadLoading((prev) => ({ ...prev, [bannerKey]: true }))
+
+    const targetFileName = BANNER_CONFIG[bannerKey].fileName
+    const { error: uploadError } = await supabase.storage.from('fotos_produtos').upload(`banners/${targetFileName}`, selectedFile, {
+      cacheControl: '3600',
+      upsert: true,
+      contentType: selectedFile.type,
+    })
+
+    if (uploadError) {
+      setFeedback(`Não foi possível salvar o ${BANNER_CONFIG[bannerKey].label.toLowerCase()}.`, 'error')
+      setBannerUploadLoading((prev) => ({ ...prev, [bannerKey]: false }))
+      return
+    }
+
+    const refreshedUrl = `${getBannerPublicUrl(targetFileName)}?v=${Date.now()}`
+
+    if (bannerImages[bannerKey]?.preview?.startsWith('blob:')) {
+      URL.revokeObjectURL(bannerImages[bannerKey].preview)
+    }
+
+    setBannerImages((prev) => ({
+      ...prev,
+      [bannerKey]: {
+        ...prev[bannerKey],
+        file: null,
+        preview: '',
+        existingUrl: refreshedUrl,
+      },
+    }))
+
+    setBannerUploadLoading((prev) => ({ ...prev, [bannerKey]: false }))
+    setFeedback(`${BANNER_CONFIG[bannerKey].label} atualizado com sucesso.`)
   }
 
   const uploadImages = async () => {
@@ -521,6 +641,51 @@ function AdminDashboard() {
               </button>
             )}
           </form>
+        </article>
+
+        <article className="admin-panel" aria-label="Banner da Home">
+          <h2>Banner da Home</h2>
+          <div className="admin-banner-grid">
+            {Object.values(BANNER_CONFIG).map((banner) => {
+              const bannerData = bannerImages[banner.key]
+              const previewUrl = bannerData.preview || bannerData.existingUrl
+
+              return (
+                <div key={banner.key} className="admin-banner-block">
+                  <p className="admin-image-upload__label">{banner.label}</p>
+                  <label
+                    className="admin-dropzone"
+                    onDragOver={(event) => event.preventDefault()}
+                    onDrop={(event) => {
+                      event.preventDefault()
+                      handleSelectBanner(banner.key, event.dataTransfer?.files)
+                    }}
+                  >
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="admin-file-input-hidden"
+                      onChange={(event) => handleSelectBanner(banner.key, event.target.files)}
+                    />
+                    {previewUrl ? (
+                      <img src={previewUrl} alt={`Pré-visualização do ${banner.label}`} className="admin-dropzone__preview" />
+                    ) : (
+                      <span className="admin-dropzone__text">Arraste uma imagem aqui ou clique para selecionar</span>
+                    )}
+                  </label>
+                  <p className="admin-image-upload__hint">{banner.helperText}</p>
+                  <button
+                    type="button"
+                    className="admin-upload-button"
+                    onClick={() => handleUploadBanner(banner.key)}
+                    disabled={bannerUploadLoading[banner.key]}
+                  >
+                    {bannerUploadLoading[banner.key] ? 'Salvando banner...' : 'Salvar banner'}
+                  </button>
+                </div>
+              )
+            })}
+          </div>
         </article>
       </section>
     </main>

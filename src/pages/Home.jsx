@@ -10,6 +10,11 @@ const PRIMARY_TABS = [
   { key: 'doacao', label: 'Doação' },
 ]
 
+const BANNER_PATHS = {
+  desktop: 'banner_home_desktop',
+  mobile: 'banner_home_mobile',
+}
+
 const normalizeText = (value = '') =>
   value
     .normalize('NFD')
@@ -35,6 +40,16 @@ function Home() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
   const [activeTab, setActiveTab] = useState('todos')
+  const [bannerUrls, setBannerUrls] = useState({ desktop: '', mobile: '' })
+  const [isBannerLoading, setIsBannerLoading] = useState(true)
+
+  const getBannerPublicUrl = (fileName) => {
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from('fotos_produtos').getPublicUrl(`banners/${fileName}`)
+
+    return publicUrl
+  }
 
   useEffect(() => {
     const fetchProdutos = async () => {
@@ -56,12 +71,37 @@ function Home() {
       setIsLoading(false)
     }
 
+    const fetchBanners = async () => {
+      setIsBannerLoading(true)
+
+      const { data, error: listError } = await supabase.storage.from('fotos_produtos').list('banners', { limit: 50 })
+
+      if (listError) {
+        setBannerUrls({ desktop: '', mobile: '' })
+        setIsBannerLoading(false)
+        return
+      }
+
+      const fileNames = new Set((data ?? []).map((item) => item.name))
+      const cacheBuster = `?v=${Date.now()}`
+
+      setBannerUrls({
+        desktop: fileNames.has(BANNER_PATHS.desktop) ? `${getBannerPublicUrl(BANNER_PATHS.desktop)}${cacheBuster}` : '',
+        mobile: fileNames.has(BANNER_PATHS.mobile) ? `${getBannerPublicUrl(BANNER_PATHS.mobile)}${cacheBuster}` : '',
+      })
+      setIsBannerLoading(false)
+    }
+
     fetchProdutos()
+    fetchBanners()
   }, [])
 
   const filteredProducts = useMemo(() => {
     return produtos.filter((item) => activeTab === 'todos' || getCategoryType(item.categoria) === activeTab)
   }, [activeTab, produtos])
+
+  const hasAnyBanner = Boolean(bannerUrls.desktop || bannerUrls.mobile)
+  const shouldRenderBanner = isBannerLoading || hasAnyBanner
 
   return (
     <main className="home-page">
@@ -73,6 +113,26 @@ function Home() {
           com a gente pelo WhatsApp.
         </p>
       </header>
+
+      {shouldRenderBanner && (
+        <section className="home-banner" aria-label="Banner principal da home">
+          {isBannerLoading ? (
+            <Skeleton className="home-banner__skeleton" />
+          ) : (
+            <picture>
+              {bannerUrls.mobile && <source media="(max-width: 767px)" srcSet={bannerUrls.mobile} />}
+              {bannerUrls.desktop && <source media="(min-width: 768px)" srcSet={bannerUrls.desktop} />}
+              <img
+                src={bannerUrls.desktop || bannerUrls.mobile}
+                alt="Destaque Cacarecos & Amenidades"
+                className="home-banner__image"
+                loading="lazy"
+                decoding="async"
+              />
+            </picture>
+          )}
+        </section>
+      )}
 
       {isLoading && (
         <section className="products-grid" role="status" aria-live="polite" aria-label="Carregando produtos">
