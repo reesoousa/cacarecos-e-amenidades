@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import ProductCard from '../components/ProductCard'
+import Skeleton from '../components/Skeleton'
 import { supabase } from '../services/supabaseClient'
 import '../styles/home.css'
 
@@ -13,12 +15,20 @@ const priceFormatter = new Intl.NumberFormat('pt-BR', {
   minimumFractionDigits: 2,
 })
 
+const normalizeText = (value = '') =>
+  value
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+
 function ProductDetails() {
   const { id } = useParams()
   const [produto, setProduto] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
   const [lightboxImage, setLightboxImage] = useState(null)
+  const [recommendedProducts, setRecommendedProducts] = useState([])
+  const [isRecommendationsLoading, setIsRecommendationsLoading] = useState(true)
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -39,6 +49,49 @@ function ProductDetails() {
 
     fetchProduct()
   }, [id])
+
+  useEffect(() => {
+    const fetchRecommendations = async () => {
+      if (!produto?.id) {
+        setRecommendedProducts([])
+        setIsRecommendationsLoading(false)
+        return
+      }
+
+      setIsRecommendationsLoading(true)
+
+      const normalizedCurrentCategory = normalizeText(produto.categoria)
+
+      const { data: sameCategoryData } = await supabase
+        .from('produtos')
+        .select('*')
+        .neq('id', produto.id)
+        .eq('status', 'Disponível')
+        .order('created_at', { ascending: false })
+
+      const sameCategory = (sameCategoryData ?? []).filter(
+        (item) => normalizeText(item.categoria) === normalizedCurrentCategory
+      )
+      const prioritizedItems = sameCategory.slice(0, 4)
+
+      if (prioritizedItems.length >= 4) {
+        setRecommendedProducts(prioritizedItems)
+        setIsRecommendationsLoading(false)
+        return
+      }
+
+      const currentIds = new Set(prioritizedItems.map((item) => item.id))
+
+      const fallbackItems = (sameCategoryData ?? [])
+        .filter((item) => !currentIds.has(item.id))
+        .slice(0, 4 - prioritizedItems.length)
+
+      setRecommendedProducts([...prioritizedItems, ...fallbackItems])
+      setIsRecommendationsLoading(false)
+    }
+
+    fetchRecommendations()
+  }, [produto])
 
   useEffect(() => {
     if (!lightboxImage) {
@@ -73,9 +126,25 @@ function ProductDetails() {
   if (isLoading) {
     return (
       <main className="home-page">
-        <section className="home-feedback" role="status" aria-live="polite">
-          <div className="loading-spinner" aria-hidden="true" />
-          <p>Carregando detalhes do produto...</p>
+        <section className="product-layout" role="status" aria-live="polite" aria-label="Carregando detalhes do produto">
+          <div className="product-gallery product-gallery--skeleton">
+            <Skeleton className="product-skeleton__featured" />
+            <div className="product-skeleton__thumbs">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <Skeleton key={`thumb-${index}`} className="product-skeleton__thumb" />
+              ))}
+            </div>
+          </div>
+
+          <article className="product-info product-info--skeleton">
+            <Skeleton className="product-skeleton__line product-skeleton__line--category" />
+            <Skeleton className="product-skeleton__line product-skeleton__line--title" />
+            <Skeleton className="product-skeleton__line product-skeleton__line--price" />
+            <Skeleton className="product-skeleton__line" />
+            <Skeleton className="product-skeleton__line" />
+            <Skeleton className="product-skeleton__line" />
+            <Skeleton className="product-skeleton__cta" />
+          </article>
         </section>
       </main>
     )
@@ -205,6 +274,34 @@ function ProductDetails() {
             Reservar via WhatsApp
           </a>
         </article>
+      </section>
+
+      <section className="product-recommendations" aria-label="Outros itens disponíveis">
+        <h2>Você também pode gostar</h2>
+
+        {isRecommendationsLoading ? (
+          <div className="recommendations-grid" role="status" aria-live="polite">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <article key={`recommendation-skeleton-${index}`} className="product-card skeleton-card">
+                <Skeleton className="skeleton-card__media" />
+                <div className="skeleton-card__body">
+                  <Skeleton className="skeleton-card__line skeleton-card__line--category" />
+                  <Skeleton className="skeleton-card__line skeleton-card__line--title" />
+                  <Skeleton className="skeleton-card__line skeleton-card__line--tag" />
+                  <Skeleton className="skeleton-card__line skeleton-card__line--price" />
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : recommendedProducts.length > 0 ? (
+          <div className="recommendations-grid">
+            {recommendedProducts.map((item) => (
+              <ProductCard key={item.id} {...item} />
+            ))}
+          </div>
+        ) : (
+          <p className="product-recommendations__empty">Sem recomendações no momento.</p>
+        )}
       </section>
 
       {lightboxImage && (
