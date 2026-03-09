@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Skeleton from '../components/Skeleton'
 import { supabase } from '../services/supabaseClient'
 import '../styles/admin.css'
 
@@ -340,7 +341,23 @@ function AdminDashboard() {
           <h2>Produtos cadastrados</h2>
 
           {isLoading ? (
-            <p className="admin-panel__placeholder">Carregando produtos...</p>
+            <ul className="admin-product-list" role="status" aria-live="polite" aria-label="Carregando produtos">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <li key={`admin-skeleton-${index}`} className="admin-product-card admin-product-card--skeleton">
+                  <Skeleton className="admin-skeleton__image" />
+                  <div className="admin-product-card__info">
+                    <Skeleton className="admin-skeleton__line admin-skeleton__line--title" />
+                    <Skeleton className="admin-skeleton__line admin-skeleton__line--price" />
+                    <Skeleton className="admin-skeleton__badge" />
+                  </div>
+                  <div className="admin-product-card__actions">
+                    <Skeleton className="admin-skeleton__button" />
+                    <Skeleton className="admin-skeleton__button" />
+                    <Skeleton className="admin-skeleton__button" />
+                  </div>
+                </li>
+              ))}
+            </ul>
           ) : produtos.length === 0 ? (
             <p className="admin-panel__placeholder">Nenhum produto cadastrado ainda.</p>
           ) : (

@@ -170,6 +170,41 @@
   object-fit: cover;
 }
 
+.admin-product-card--skeleton {
+  align-items: start;
+}
+
+.admin-skeleton__image {
+  width: 84px;
+  height: 84px;
+  border-radius: 10px;
+}
+
+.admin-skeleton__line {
+  height: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+.admin-skeleton__line--title {
+  width: 80%;
+  height: 1rem;
+}
+
+.admin-skeleton__line--price {
+  width: 42%;
+}
+
+.admin-skeleton__badge {
+  width: 90px;
+  height: 1.4rem;
+  border-radius: 999px;
+}
+
+.admin-skeleton__button {
+  width: 100%;
+  min-height: 44px;
+}
+
 .admin-product-card__info h3,
 .admin-product-card__info p {
   margin: 0;

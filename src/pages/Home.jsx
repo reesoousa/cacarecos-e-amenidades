@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import ProductCard from '../components/ProductCard'
+import Skeleton from '../components/Skeleton'
 import { supabase } from '../services/supabaseClient'
 import '../styles/home.css'
 
@@ -74,9 +75,18 @@ function Home() {
       </header>
 
       {isLoading && (
-        <section className="home-feedback" role="status" aria-live="polite" aria-label="Carregando produtos">
-          <div className="loading-spinner" aria-hidden="true" />
-          <p>Carregando produtos...</p>
+        <section className="products-grid" role="status" aria-live="polite" aria-label="Carregando produtos">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <article key={`home-skeleton-${index}`} className="product-card skeleton-card">
+              <Skeleton className="skeleton-card__media" />
+              <div className="skeleton-card__body">
+                <Skeleton className="skeleton-card__line skeleton-card__line--category" />
+                <Skeleton className="skeleton-card__line skeleton-card__line--title" />
+                <Skeleton className="skeleton-card__line skeleton-card__line--tag" />
+                <Skeleton className="skeleton-card__line skeleton-card__line--price" />
+              </div>
+            </article>
+          ))}
         </section>
       )}
 
