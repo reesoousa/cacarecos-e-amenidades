@@ -71,6 +71,8 @@ function AdminDashboard() {
     return publicUrl
   }
 
+  const withCacheBusting = (url) => `${url}?t=${Date.now()}`
+
   const fetchBannerImages = async () => {
     const { data, error: listError } = await supabase.storage.from('fotos_produtos').list('banners', { limit: 50 })
 
@@ -84,13 +86,13 @@ function AdminDashboard() {
       desktop: {
         ...prev.desktop,
         existingUrl: availableFileNames.has(BANNER_CONFIG.desktop.fileName)
-          ? `${getBannerPublicUrl(BANNER_CONFIG.desktop.fileName)}?v=${Date.now()}`
+          ? withCacheBusting(getBannerPublicUrl(BANNER_CONFIG.desktop.fileName))
           : '',
       },
       mobile: {
         ...prev.mobile,
         existingUrl: availableFileNames.has(BANNER_CONFIG.mobile.fileName)
-          ? `${getBannerPublicUrl(BANNER_CONFIG.mobile.fileName)}?v=${Date.now()}`
+          ? withCacheBusting(getBannerPublicUrl(BANNER_CONFIG.mobile.fileName))
           : '',
       },
     }))
@@ -308,11 +310,26 @@ function AdminDashboard() {
     setBannerUploadLoading((prev) => ({ ...prev, [bannerKey]: true }))
 
     const targetFileName = BANNER_CONFIG[bannerKey].fileName
-    const { error: uploadError } = await supabase.storage.from('fotos_produtos').upload(`banners/${targetFileName}`, selectedFile, {
+    const bannerPath = `banners/${targetFileName}`
+    let { error: uploadError } = await supabase.storage.from('fotos_produtos').upload(bannerPath, selectedFile, {
       cacheControl: '3600',
       upsert: true,
       contentType: selectedFile.type,
     })
+
+    if (uploadError) {
+      const { error: removeError } = await supabase.storage.from('fotos_produtos').remove([bannerPath])
+
+      if (!removeError) {
+        const retryUpload = await supabase.storage.from('fotos_produtos').upload(bannerPath, selectedFile, {
+          cacheControl: '3600',
+          upsert: true,
+          contentType: selectedFile.type,
+        })
+
+        uploadError = retryUpload.error
+      }
+    }
 
     if (uploadError) {
       setFeedback(`Não foi possível salvar o ${BANNER_CONFIG[bannerKey].label.toLowerCase()}.`, 'error')
@@ -320,7 +337,7 @@ function AdminDashboard() {
       return
     }
 
-    const refreshedUrl = `${getBannerPublicUrl(targetFileName)}?v=${Date.now()}`
+    const refreshedUrl = withCacheBusting(getBannerPublicUrl(targetFileName))
 
     if (bannerImages[bannerKey]?.preview?.startsWith('blob:')) {
       URL.revokeObjectURL(bannerImages[bannerKey].preview)

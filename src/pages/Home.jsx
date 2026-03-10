@@ -51,6 +51,8 @@ function Home() {
     return publicUrl
   }
 
+  const withCacheBusting = (url) => `${url}?t=${Date.now()}`
+
   useEffect(() => {
     const fetchProdutos = async () => {
       setIsLoading(true)
@@ -83,11 +85,9 @@ function Home() {
       }
 
       const fileNames = new Set((data ?? []).map((item) => item.name))
-      const cacheBuster = `?v=${Date.now()}`
-
       setBannerUrls({
-        desktop: fileNames.has(BANNER_PATHS.desktop) ? `${getBannerPublicUrl(BANNER_PATHS.desktop)}${cacheBuster}` : '',
-        mobile: fileNames.has(BANNER_PATHS.mobile) ? `${getBannerPublicUrl(BANNER_PATHS.mobile)}${cacheBuster}` : '',
+        desktop: fileNames.has(BANNER_PATHS.desktop) ? withCacheBusting(getBannerPublicUrl(BANNER_PATHS.desktop)) : '',
+        mobile: fileNames.has(BANNER_PATHS.mobile) ? withCacheBusting(getBannerPublicUrl(BANNER_PATHS.mobile)) : '',
       })
       setIsBannerLoading(false)
     }
