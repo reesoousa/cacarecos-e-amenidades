@@ -26,7 +26,10 @@ function ProductCard({ id, nome, preco, categoria, estado_uso, is_feito_a_mao, f
   const coverImage = Array.isArray(fotos) && fotos.length > 0 ? fotos[0] : PRODUCT_PLACEHOLDER_IMAGE
 
   return (
-    <article className="product-card transition-all duration-500 ease-out" aria-labelledby={`product-title-${id}`}>
+    <article
+      className={`product-card transition-all duration-500 ease-out ${is_feito_a_mao ? 'is-handmade' : ''}`}
+      aria-labelledby={`product-title-${id}`}
+    >
       <Link to={`/produto/${id}`} className="product-card__link-wrapper" aria-label={`Ver detalhes de ${nome}`}>
         <div className="product-card__media">
           <img src={coverImage} alt={nome} className="product-card__image" loading="lazy" />
