@@ -186,7 +186,7 @@ function ProductDetails() {
 
       <section className="product-layout" aria-label="Detalhes do produto">
         <div className="product-gallery">
-          <div className="product-gallery-mobile product-gallery-mobile--peek hide-scrollbar" aria-label="Galeria mobile">
+          <div className="product-gallery-mobile hide-scrollbar" aria-label="Galeria mobile">
             {galleryImages.map((image, index) => (
               <button key={`${image}-${index}`} type="button" className="product-gallery-mobile__item" onClick={() => setLightboxImage(image)}>
                 <img

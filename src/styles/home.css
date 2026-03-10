@@ -723,18 +723,8 @@ body.theme-atelie {
 
 
 .product-gallery {
-  margin-inline: calc(50% - 50vw);
-  padding: 0;
-  border: 0;
-  box-shadow: none;
-  background: transparent;
-}
-
-.product-gallery-mobile--peek {
-  min-height: 20rem;
-  margin-left: -1rem;
-  padding: 0 0 0 1rem;
-  gap: 0.5rem;
+  margin-inline: 0;
+  padding: 1rem;
 }
 
 .product-gallery-mobile__item {
