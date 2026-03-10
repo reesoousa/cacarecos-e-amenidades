@@ -70,6 +70,7 @@
   border: 1px solid var(--border);
   background: var(--bg-soft);
   color: var(--text-main);
+  font-size: 1rem;
   padding: 0.65rem 0.75rem;
 }
 
@@ -464,5 +465,14 @@
 @media (min-width: 860px) {
   .admin-banner-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .auth-form input,
+  .admin-form input,
+  .admin-form textarea,
+  .admin-form select {
+    font-size: 0.875rem;
   }
 }

@@ -52,7 +52,9 @@ body.theme-atelie {
 
 .home-hero__brand-row {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
   gap: 1rem;
 }
 
@@ -98,10 +100,12 @@ body.theme-atelie {
 }
 
 .store-mode-switch {
+  --switch-pad: 0.25rem;
   position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  padding: 0.3rem;
+  width: max-content;
+  padding: var(--switch-pad);
   border-radius: 999px;
   border: 1px solid var(--border);
   background: var(--bg-soft);
@@ -110,10 +114,10 @@ body.theme-atelie {
 
 .store-mode-switch__indicator {
   position: absolute;
-  top: 0.3rem;
-  left: 0.3rem;
-  width: calc(50% - 0.3rem);
-  height: calc(100% - 0.6rem);
+  top: var(--switch-pad);
+  left: var(--switch-pad);
+  width: calc(50% - var(--switch-pad));
+  height: calc(100% - (var(--switch-pad) * 2));
   border-radius: 999px;
   border: 1px solid #33c975;
   background: #45de8a;
@@ -122,7 +126,7 @@ body.theme-atelie {
 }
 
 .store-mode-switch__indicator.is-atelie {
-  transform: translateX(calc(100% + 0.3rem));
+  transform: translateX(calc(100% + var(--switch-pad)));
 }
 
 .store-mode-switch__button {
@@ -1061,20 +1065,23 @@ body {
 }
 
 .store-mode-switch {
-  width: min(360px, 100%);
-  padding: 0.35rem;
+  --switch-pad: 0.3rem;
+  width: max-content;
+  max-width: 100%;
+  margin-left: auto;
+  padding: var(--switch-pad);
   gap: 0;
 }
 
 .store-mode-switch__indicator {
-  top: 0.35rem;
-  left: 0.35rem;
-  width: calc(50% - 0.35rem);
-  height: calc(100% - 0.7rem);
+  top: var(--switch-pad);
+  left: var(--switch-pad);
+  width: calc(50% - var(--switch-pad));
+  height: calc(100% - (var(--switch-pad) * 2));
 }
 
 .store-mode-switch__indicator.is-atelie {
-  transform: translateX(calc(100% + 0.35rem));
+  transform: translateX(calc(100% + var(--switch-pad)));
 }
 
 .store-mode-switch__button {
@@ -1083,7 +1090,7 @@ body {
   justify-content: center;
   gap: 0.45rem;
   border-radius: 999px;
-  padding: 0.5rem 1rem;
+  padding: 0.4rem 0.68rem;
 }
 
 .store-mode-switch__icon {
@@ -1145,6 +1152,10 @@ body {
 
   .home-hero__logo-line--mobile::after {
     content: '';
+  }
+
+  .store-mode-switch {
+    width: min(360px, 100%);
   }
 
   .store-mode-switch__button {
