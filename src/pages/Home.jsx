@@ -10,6 +10,11 @@ const PRIMARY_TABS = [
   { key: 'doacao', label: 'Doação' },
 ]
 
+const STORE_MODES = {
+  desapegos: 'desapegos',
+  atelie: 'atelie',
+}
+
 const BANNER_PATHS = {
   desktop: 'banner_home_desktop',
   mobile: 'banner_home_mobile',
@@ -40,8 +45,11 @@ function Home() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
   const [activeTab, setActiveTab] = useState('todos')
+  const [storeMode, setStoreMode] = useState(STORE_MODES.desapegos)
   const [bannerUrls, setBannerUrls] = useState({ desktop: '', mobile: '' })
   const [isBannerLoading, setIsBannerLoading] = useState(true)
+
+  const isAtelieMode = storeMode === STORE_MODES.atelie
 
   const getBannerPublicUrl = (fileName) => {
     const {
@@ -52,6 +60,14 @@ function Home() {
   }
 
   const withCacheBusting = (url) => `${url}?t=${Date.now()}`
+
+  useEffect(() => {
+    document.body.classList.toggle('theme-atelie', isAtelieMode)
+
+    return () => {
+      document.body.classList.remove('theme-atelie')
+    }
+  }, [isAtelieMode])
 
   useEffect(() => {
     const fetchProdutos = async () => {
@@ -97,16 +113,51 @@ function Home() {
   }, [])
 
   const filteredProducts = useMemo(() => {
+    if (isAtelieMode) {
+      return produtos.filter((item) => item.is_feito_a_mao === true)
+    }
+
     return produtos.filter((item) => activeTab === 'todos' || getCategoryType(item.categoria) === activeTab)
-  }, [activeTab, produtos])
+  }, [activeTab, isAtelieMode, produtos])
 
   const hasAnyBanner = Boolean(bannerUrls.desktop || bannerUrls.mobile)
-  const shouldRenderBanner = isBannerLoading || hasAnyBanner
+  const shouldRenderBanner = !isAtelieMode && (isBannerLoading || hasAnyBanner)
 
   return (
-    <main className="home-page">
-      <header className="home-hero">
-        <h1>Cacarecos & Amenidades</h1>
+    <main className={`home-page ${isAtelieMode ? 'is-atelie' : ''}`}>
+      <header className={`home-hero ${isAtelieMode ? 'is-atelie' : ''}`}>
+        <div className="home-hero__brand-row">
+          <div className="home-hero__logo home-hero__logo--mobile" aria-label="Logo compacto Cacarecos & Amenidades">
+            C&A
+          </div>
+
+          <div className="home-hero__logo home-hero__logo--desktop" aria-label="Logo horizontal Cacarecos & Amenidades">
+            <span className="home-hero__logo-mark">C&A</span>
+            <span className="home-hero__logo-text">Cacarecos & Amenidades</span>
+          </div>
+
+          <div className="store-mode-switch" role="tablist" aria-label="Modo da loja">
+            <span className={`store-mode-switch__indicator ${isAtelieMode ? 'is-atelie' : ''}`} aria-hidden="true" />
+            <button
+              type="button"
+              role="tab"
+              aria-selected={!isAtelieMode}
+              className={`store-mode-switch__button ${!isAtelieMode ? 'is-active' : ''}`}
+              onClick={() => setStoreMode(STORE_MODES.desapegos)}
+            >
+              Desapegos
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={isAtelieMode}
+              className={`store-mode-switch__button ${isAtelieMode ? 'is-active' : ''}`}
+              onClick={() => setStoreMode(STORE_MODES.atelie)}
+            >
+              Ateliê
+            </button>
+          </div>
+        </div>
       </header>
 
       {shouldRenderBanner && (
@@ -127,6 +178,25 @@ function Home() {
             </picture>
           )}
         </section>
+      )}
+
+      {isAtelieMode && (
+        <>
+          <section className="atelier-banner" aria-label="Banner do Ateliê">
+            <div className="atelier-banner__content">
+              <p>Ateliê Cacarecos</p>
+              <h2>Cerâmicas autorais em pequenos lotes</h2>
+            </div>
+          </section>
+
+          <section className="atelier-manifesto" aria-label="Manifesto do Ateliê">
+            <h2>Do barro ao afeto</h2>
+            <p>
+              Cada peça nasce do gesto manual, do tempo de secagem e da queima cuidadosa. No ateliê, celebramos
+              imperfeições orgânicas e criamos objetos para morar com você por muitos anos.
+            </p>
+          </section>
+        </>
       )}
 
       {isLoading && (
@@ -153,30 +223,36 @@ function Home() {
 
       {!isLoading && !error && (
         <>
-          <section className="filters-bar" aria-label="Filtros de busca">
-            <div className="filters-tabs" role="tablist" aria-label="Tipo de anúncio">
-              {PRIMARY_TABS.map((tab) => (
-                <button
-                  key={tab.key}
-                  type="button"
-                  className={`filters-tab ${activeTab === tab.key ? 'is-active' : ''}`}
-                  onClick={() => setActiveTab(tab.key)}
-                  role="tab"
-                  aria-selected={activeTab === tab.key}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          </section>
+          {!isAtelieMode && (
+            <section className="filters-bar" aria-label="Filtros de busca">
+              <div className="filters-tabs" role="tablist" aria-label="Tipo de anúncio">
+                {PRIMARY_TABS.map((tab) => (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    className={`filters-tab ${activeTab === tab.key ? 'is-active' : ''}`}
+                    onClick={() => setActiveTab(tab.key)}
+                    role="tab"
+                    aria-selected={activeTab === tab.key}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
 
           <section className="products-grid" aria-label="Lista de produtos disponíveis">
             {filteredProducts.length > 0 ? (
               filteredProducts.map((item) => <ProductCard key={item.id} {...item} />)
             ) : (
               <article className="home-empty-state">
-                <h2>Nenhum item com esse filtro</h2>
-                <p>Tente outra categoria para encontrar novos itens.</p>
+                <h2>{isAtelieMode ? 'Nenhuma peça autoral disponível no momento' : 'Nenhum item com esse filtro'}</h2>
+                <p>
+                  {isAtelieMode
+                    ? 'Novas coleções entram periodicamente. Volte em breve para descobrir novidades do ateliê.'
+                    : 'Tente outra categoria para encontrar novos itens.'}
+                </p>
               </article>
             )}
           </section>

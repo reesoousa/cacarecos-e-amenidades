@@ -3,6 +3,26 @@
   width: min(1240px, 100% - 2rem);
   margin: 0 auto;
   padding: 1.25rem 0 4rem;
+  transition: background-color 500ms ease, color 500ms ease;
+}
+
+.home-page.is-atelie {
+  --bg-soft: #f5f2ed;
+  --surface: #fcfaf6;
+  --text-main: #2d2926;
+  --text-muted: #6f655e;
+  --border: #d9cec2;
+  --shadow: 0 18px 34px rgba(48, 35, 28, 0.08);
+  color: var(--text-main);
+}
+
+body {
+  transition: background-color 500ms ease, color 500ms ease;
+}
+
+body.theme-atelie {
+  background: #faf9f6;
+  color: #2d2926;
 }
 
 .home-hero,
@@ -28,6 +48,96 @@
 
 .home-hero {
   padding: 1.5rem;
+}
+
+.home-hero__brand-row {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.home-hero__logo {
+  border: 1px solid var(--border);
+  background: var(--bg-soft);
+  border-radius: 14px;
+}
+
+.home-hero__logo--mobile {
+  width: 70px;
+  height: 70px;
+  margin: 0 auto;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--brand);
+}
+
+.home-hero__logo--desktop {
+  display: none;
+  align-items: center;
+  gap: 0.75rem;
+  width: max-content;
+  padding: 0.55rem 1rem;
+}
+
+.home-hero__logo-mark {
+  background: #0f172a;
+  color: var(--brand);
+  border-radius: 9px;
+  padding: 0.35rem 0.55rem;
+  font-weight: 700;
+}
+
+.home-hero__logo-text {
+  font-weight: 700;
+}
+
+.home-hero.is-atelie .home-hero__logo-mark {
+  background: #1f2937;
+}
+
+.store-mode-switch {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 0.3rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-soft);
+  overflow: hidden;
+}
+
+.store-mode-switch__indicator {
+  position: absolute;
+  top: 0.3rem;
+  left: 0.3rem;
+  width: calc(50% - 0.3rem);
+  height: calc(100% - 0.6rem);
+  border-radius: 999px;
+  border: 1px solid #33c975;
+  background: #45de8a;
+  transform: translateX(0);
+  transition: transform 300ms ease-out;
+}
+
+.store-mode-switch__indicator.is-atelie {
+  transform: translateX(calc(100% + 0.3rem));
+}
+
+.store-mode-switch__button {
+  position: relative;
+  z-index: 1;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--text-main);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.store-mode-switch__button.is-active {
+  color: #04230f;
 }
 
 .home-hero__eyebrow {
@@ -310,7 +420,7 @@
   background: var(--bg-soft);
   padding: 0.2rem 0.55rem;
   font-size: 0.75rem;
-  color: #d4d4d8;
+  color: var(--text-muted);
 }
 
 .product-card__footer {
@@ -334,28 +444,28 @@
   font-size: 0.73rem;
   font-weight: 700;
   border: 1px solid transparent;
-  color: #f4f4f5;
+  color: var(--text-main);
 }
 
 .product-card__tag.is-sale {
-  background: #1f2937;
-  border-color: #374151;
+  background: var(--bg-soft);
+  border-color: var(--border);
 }
 
 .product-card__tag.is-donation {
-  background: #1f2937;
-  border-color: #22543d;
+  background: var(--bg-soft);
+  border-color: #45de8a;
 }
 
 .product-card__tag.is-default {
-  background: #27272a;
-  border-color: #3f3f46;
+  background: var(--bg-soft);
+  border-color: var(--border);
 }
 
 .product-card__tag.is-usage {
-  background: #18181b;
-  border-color: #3f3f46;
-  color: #e4e4e7;
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text-muted);
 }
 
 .product-card__price,
@@ -804,6 +914,57 @@
   background: var(--surface);
 }
 
+.atelier-banner {
+  margin-top: 1.2rem;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: linear-gradient(130deg, #efe6d9 0%, #f7f2ea 45%, #d8c5b0 100%);
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1 / 1;
+}
+
+.atelier-banner__content {
+  text-align: center;
+  color: #2f241d;
+  padding: 1.2rem;
+}
+
+.atelier-banner__content p {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.11em;
+  font-size: 0.78rem;
+  color: #6f5747;
+}
+
+.atelier-banner__content h2 {
+  margin: 0.6rem 0 0;
+  font-size: clamp(1.5rem, 5vw, 2.4rem);
+}
+
+.atelier-manifesto {
+  margin-top: 1rem;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 1.5rem 1.25rem;
+  text-align: center;
+}
+
+.atelier-manifesto h2 {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.7rem, 5vw, 2.2rem);
+}
+
+.atelier-manifesto p {
+  margin: 0.8rem auto 0;
+  max-width: 65ch;
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
 .home-banner picture,
 .home-banner__image,
 .home-banner__skeleton {
@@ -821,5 +982,29 @@
   .home-banner__image,
   .home-banner__skeleton {
     aspect-ratio: 4 / 1;
+  }
+
+  .atelier-banner {
+    aspect-ratio: 4 / 1;
+  }
+}
+
+@media (min-width: 840px) {
+  .home-hero__brand-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .home-hero__logo--mobile {
+    display: none;
+  }
+
+  .home-hero__logo--desktop {
+    display: inline-flex;
+  }
+
+  .store-mode-switch {
+    width: min(340px, 100%);
   }
 }
