@@ -5,7 +5,7 @@ import Skeleton from '../components/Skeleton'
 import { supabase } from '../services/supabaseClient'
 import '../styles/home.css'
 
-const WHATSAPP_NUMBER = 'SEU_NUMERO'
+const WHATSAPP_NUMBER = '5511966751161'
 const PRODUCT_PLACEHOLDER_IMAGE =
   'https://images.unsplash.com/photo-1488998527040-85054a85150e?auto=format&fit=crop&w=1200&q=80'
 
@@ -172,7 +172,10 @@ function ProductDetails() {
   const hasPrice = typeof produto.preco === 'number' && produto.preco > 0
   const isReserved = produto.status?.toLowerCase() === 'reservado'
   const priceText = isDonation || !hasPrice ? 'Doação' : priceFormatter.format(produto.preco)
-  const waText = encodeURIComponent(`Oi! Vi o item ${produto.nome} e quero reservar.`)
+  const currentPageUrl = window.location.href
+  const waText = encodeURIComponent(
+    `Oi! Vi o item *${produto.nome}* na lojinha e queria saber se ainda está disponível. Vamos aos negócios! 🔗 ${currentPageUrl}`
+  )
   const whatsappLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${waText}`
 
   return (
@@ -268,7 +271,7 @@ function ProductDetails() {
           <a
             href={isReserved ? undefined : whatsappLink}
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             className={`product-whatsapp-cta ${isReserved ? 'is-disabled' : ''}`}
             aria-disabled={isReserved}
             onClick={(event) => {
@@ -280,7 +283,7 @@ function ProductDetails() {
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M19.05 4.94A9.94 9.94 0 0 0 12 2a10 10 0 0 0-8.66 15l-1.3 4.76 4.88-1.28A10 10 0 1 0 19.05 4.94ZM12 20.17a8.08 8.08 0 0 1-4.1-1.11l-.3-.18-2.9.76.78-2.82-.2-.3a8.17 8.17 0 1 1 6.72 3.65Zm4.49-6.14c-.25-.12-1.48-.73-1.71-.82-.23-.08-.4-.12-.56.12-.17.25-.65.82-.8.98-.15.17-.3.19-.56.06-.25-.13-1.08-.4-2.05-1.28-.75-.66-1.25-1.47-1.4-1.72-.15-.25-.02-.39.11-.52.12-.12.25-.3.37-.45.13-.15.17-.25.25-.42.08-.16.04-.31-.02-.43-.06-.12-.56-1.35-.77-1.86-.2-.47-.4-.4-.56-.4h-.48c-.16 0-.43.06-.65.31-.23.25-.85.83-.85 2.03s.87 2.37 1 2.53c.12.16 1.68 2.56 4.08 3.6.57.25 1.02.4 1.37.51.57.18 1.1.16 1.52.1.46-.07 1.48-.6 1.69-1.19.21-.58.21-1.08.15-1.18-.06-.1-.23-.16-.48-.29Z" />
             </svg>
-            Reservar via WhatsApp
+            Negociar por Whatsapp
           </a>
         </article>
       </section>

@@ -69,6 +69,8 @@ function Home() {
   const [storeMode, setStoreMode] = useState(STORE_MODES.desapegos)
   const [bannerUrls, setBannerUrls] = useState({ desktop: '', mobile: '' })
   const [isBannerLoading, setIsBannerLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
 
   const isAtelieMode = storeMode === STORE_MODES.atelie
 
@@ -134,12 +136,40 @@ function Home() {
   }, [])
 
   const filteredProducts = useMemo(() => {
+    const normalizedSearch = normalizeText(searchQuery.trim())
+
     if (isAtelieMode) {
-      return produtos.filter((item) => item.is_feito_a_mao === true)
+      return produtos.filter((item) => {
+        if (item.is_feito_a_mao !== true) {
+          return false
+        }
+
+        if (!normalizedSearch) {
+          return true
+        }
+
+        const normalizedName = normalizeText(item.nome)
+        const normalizedDescription = normalizeText(item.descricao)
+        return normalizedName.includes(normalizedSearch) || normalizedDescription.includes(normalizedSearch)
+      })
     }
 
-    return produtos.filter((item) => activeTab === 'todos' || getCategoryType(item.categoria) === activeTab)
-  }, [activeTab, isAtelieMode, produtos])
+    return produtos.filter((item) => {
+      const matchesTab = activeTab === 'todos' || getCategoryType(item.categoria) === activeTab
+
+      if (!matchesTab) {
+        return false
+      }
+
+      if (!normalizedSearch) {
+        return true
+      }
+
+      const normalizedName = normalizeText(item.nome)
+      const normalizedDescription = normalizeText(item.descricao)
+      return normalizedName.includes(normalizedSearch) || normalizedDescription.includes(normalizedSearch)
+    })
+  }, [activeTab, isAtelieMode, produtos, searchQuery])
 
   const hasAnyBanner = Boolean(bannerUrls.desktop || bannerUrls.mobile)
   const shouldRenderBanner = !isAtelieMode && (isBannerLoading || hasAnyBanner)
@@ -243,19 +273,49 @@ function Home() {
         <>
           {!isAtelieMode && (
             <section className="filters-bar" aria-label="Filtros de busca">
-              <div className="filters-tabs" role="tablist" aria-label="Tipo de anúncio">
-                {PRIMARY_TABS.map((tab) => (
+              <div className="filters-row">
+                <div className="filters-tabs" role="tablist" aria-label="Tipo de anúncio">
+                  {PRIMARY_TABS.map((tab) => (
+                    <button
+                      key={tab.key}
+                      type="button"
+                      className={`filters-tab ${activeTab === tab.key ? 'is-active' : ''}`}
+                      onClick={() => setActiveTab(tab.key)}
+                      role="tab"
+                      aria-selected={activeTab === tab.key}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+
+                <div className={`filters-search ${isSearchOpen ? 'is-open' : ''}`}>
                   <button
-                    key={tab.key}
                     type="button"
-                    className={`filters-tab ${activeTab === tab.key ? 'is-active' : ''}`}
-                    onClick={() => setActiveTab(tab.key)}
-                    role="tab"
-                    aria-selected={activeTab === tab.key}
+                    className="filters-search__toggle"
+                    aria-label={isSearchOpen ? 'Fechar busca' : 'Abrir busca'}
+                    aria-expanded={isSearchOpen}
+                    onClick={() => setIsSearchOpen((prev) => !prev)}
                   >
-                    {tab.label}
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M10.5 3a7.5 7.5 0 0 1 5.96 12.05l4.75 4.75a1 1 0 0 1-1.42 1.41l-4.75-4.74A7.5 7.5 0 1 1 10.5 3Zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Z" />
+                    </svg>
                   </button>
-                ))}
+
+                  <input
+                    type="search"
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    className="filters-search__input"
+                    placeholder="Buscar item"
+                    aria-label="Buscar por título ou descrição"
+                    onBlur={() => {
+                      if (!searchQuery.trim()) {
+                        setIsSearchOpen(false)
+                      }
+                    }}
+                  />
+                </div>
               </div>
             </section>
           )}
