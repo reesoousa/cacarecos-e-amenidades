@@ -1,6 +1,24 @@
+import { useEffect, useState } from 'react'
+
 function Footer() {
+  const [isAtelieMode, setIsAtelieMode] = useState(() =>
+    typeof document !== 'undefined' ? document.body.classList.contains('theme-atelie') : false
+  )
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return undefined
+
+    const observer = new MutationObserver(() => {
+      setIsAtelieMode(document.body.classList.contains('theme-atelie'))
+    })
+
+    observer.observe(document.body, { attributes: true, attributeFilter: ['class'] })
+
+    return () => observer.disconnect()
+  }, [])
+
   return (
-    <footer className="site-footer" aria-label="Rodapé do projeto">
+    <footer className={`site-footer ${isAtelieMode ? 'is-atelie' : ''}`} aria-label="Rodapé do projeto">
       <div className="site-footer__content">
         <h2>Cacarecos e Amenidades</h2>
         <p>

@@ -1008,3 +1008,152 @@ body.theme-atelie {
     width: min(340px, 100%);
   }
 }
+
+/* Refinements: header, switcher, theme wave and ateliê details */
+body {
+  background: #111216;
+}
+
+.theme-wave-layer {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: #faf9f6;
+  transform-origin: bottom;
+  transform: scaleY(0);
+  transition: transform 700ms ease-in-out;
+}
+
+.theme-wave-layer.is-atelie {
+  transform: scaleY(1);
+}
+
+.home-page,
+.home-hero,
+.filters-bar,
+.product-card,
+.home-feedback,
+.home-empty-state,
+.product-gallery,
+.product-info,
+.site-footer {
+  transition: color 450ms ease, background-color 450ms ease, border-color 450ms ease, box-shadow 450ms ease;
+}
+
+.home-hero__logo {
+  border: 0;
+  background: transparent;
+  border-radius: 0;
+  width: max-content;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  font-size: clamp(1.35rem, 5vw, 1.8rem);
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.home-hero__logo-line--mobile {
+  display: inline;
+}
+
+.store-mode-switch {
+  width: min(360px, 100%);
+  padding: 0.35rem;
+  gap: 0;
+}
+
+.store-mode-switch__indicator {
+  top: 0.35rem;
+  left: 0.35rem;
+  width: calc(50% - 0.35rem);
+  height: calc(100% - 0.7rem);
+}
+
+.store-mode-switch__indicator.is-atelie {
+  transform: translateX(calc(100% + 0.35rem));
+}
+
+.store-mode-switch__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
+}
+
+.store-mode-switch__icon {
+  width: 1.05rem;
+  height: 1.05rem;
+  display: inline-flex;
+}
+
+.store-mode-switch__icon svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+
+.store-mode-switch__label {
+  display: none;
+}
+
+.home-page.is-atelie .store-mode-switch__button.is-active .store-mode-switch__icon {
+  color: #1a8f58;
+}
+
+.home-page.is-atelie .product-card.is-handmade {
+  border-color: #45de8a;
+  box-shadow: 0 0 0 1px rgba(69, 222, 138, 0.28);
+}
+
+.atelier-manifesto h2 {
+  display: inline-block;
+  text-decoration: underline;
+  text-decoration-color: #45de8a;
+  text-underline-offset: 0.2rem;
+  text-decoration-thickness: 2px;
+}
+
+.site-footer.is-atelie {
+  background: #f5efe5;
+  border-top-color: #d9cec2;
+  color: #2d2926;
+}
+
+.site-footer.is-atelie p {
+  color: #5a5048;
+}
+
+.site-footer.is-atelie .site-footer__social a {
+  background: #fcfaf6;
+  border-color: #d9cec2;
+  color: #2d2926;
+}
+
+@media (min-width: 840px) {
+  .home-hero__logo {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.45rem;
+    line-height: 1;
+  }
+
+  .home-hero__logo-line--mobile::after {
+    content: '';
+  }
+
+  .store-mode-switch__button {
+    justify-content: center;
+    padding-inline: 1.25rem;
+  }
+
+  .store-mode-switch__label {
+    display: inline;
+    white-space: nowrap;
+  }
+}

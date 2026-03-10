@@ -15,6 +15,27 @@ const STORE_MODES = {
   atelie: 'atelie',
 }
 
+const STORE_MODE_OPTIONS = [
+  {
+    key: STORE_MODES.desapegos,
+    label: 'Desapegos',
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 7.5c0-1.38 1.12-2.5 2.5-2.5h11A2.5 2.5 0 0 1 20 7.5v9a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5v-9Zm2.5-1a1 1 0 0 0-1 1v1.25h13V7.5a1 1 0 0 0-1-1h-11Zm12 3.75h-13v6.25a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-6.25Z" />
+      </svg>
+    ),
+  },
+  {
+    key: STORE_MODES.atelie,
+    label: 'Ateliê',
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 3a9 9 0 1 0 9 9c0-1.5-1.2-2.7-2.7-2.7h-1.8a1.6 1.6 0 0 1-1.58-1.9l.16-.75A2.9 2.9 0 0 0 12.22 3H12Zm-4.5 8.25a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Zm4-2a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Zm4 2a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Zm-8 4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Z" />
+      </svg>
+    ),
+  },
+]
+
 const BANNER_PATHS = {
   desktop: 'banner_home_desktop',
   mobile: 'banner_home_mobile',
@@ -125,37 +146,34 @@ function Home() {
 
   return (
     <main className={`home-page ${isAtelieMode ? 'is-atelie' : ''}`}>
+      <div className={`theme-wave-layer ${isAtelieMode ? 'is-atelie' : ''}`} aria-hidden="true" />
       <header className={`home-hero ${isAtelieMode ? 'is-atelie' : ''}`}>
         <div className="home-hero__brand-row">
-          <div className="home-hero__logo home-hero__logo--mobile" aria-label="Logo compacto Cacarecos & Amenidades">
-            C&A
-          </div>
-
-          <div className="home-hero__logo home-hero__logo--desktop" aria-label="Logo horizontal Cacarecos & Amenidades">
-            <span className="home-hero__logo-mark">C&A</span>
-            <span className="home-hero__logo-text">Cacarecos & Amenidades</span>
+          <div className="home-hero__logo" aria-label="Logo Cacarecos & Amenidades">
+            <span className="home-hero__logo-line home-hero__logo-line--mobile">Cacarecos &amp;</span>
+            <span className="home-hero__logo-line">Amenidades</span>
           </div>
 
           <div className="store-mode-switch" role="tablist" aria-label="Modo da loja">
             <span className={`store-mode-switch__indicator ${isAtelieMode ? 'is-atelie' : ''}`} aria-hidden="true" />
-            <button
-              type="button"
-              role="tab"
-              aria-selected={!isAtelieMode}
-              className={`store-mode-switch__button ${!isAtelieMode ? 'is-active' : ''}`}
-              onClick={() => setStoreMode(STORE_MODES.desapegos)}
-            >
-              Desapegos
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={isAtelieMode}
-              className={`store-mode-switch__button ${isAtelieMode ? 'is-active' : ''}`}
-              onClick={() => setStoreMode(STORE_MODES.atelie)}
-            >
-              Ateliê
-            </button>
+            {STORE_MODE_OPTIONS.map((option) => {
+              const isActive = storeMode === option.key
+
+              return (
+                <button
+                  key={option.key}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  aria-label={option.label}
+                  className={`store-mode-switch__button ${isActive ? 'is-active' : ''}`}
+                  onClick={() => setStoreMode(option.key)}
+                >
+                  <span className="store-mode-switch__icon">{option.icon}</span>
+                  <span className="store-mode-switch__label">{option.label}</span>
+                </button>
+              )
+            })}
           </div>
         </div>
       </header>
