@@ -289,10 +289,10 @@ function Home() {
                   ))}
                 </div>
 
-                <div className={`filters-search ${isSearchOpen ? 'is-open' : ''}`}>
+                <div className="ml-auto flex items-center gap-2">
                   <button
                     type="button"
-                    className="filters-search__toggle"
+                    className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-700 bg-zinc-800/70 text-zinc-100 md:hidden"
                     aria-label={isSearchOpen ? 'Fechar busca' : 'Abrir busca'}
                     aria-expanded={isSearchOpen}
                     onClick={() => setIsSearchOpen((prev) => !prev)}
@@ -302,21 +302,52 @@ function Home() {
                     </svg>
                   </button>
 
-                  <input
-                    type="search"
-                    value={searchQuery}
-                    onChange={(event) => setSearchQuery(event.target.value)}
-                    className="filters-search__input"
-                    placeholder="Buscar item"
-                    aria-label="Buscar por título ou descrição"
-                    onBlur={() => {
-                      if (!searchQuery.trim()) {
-                        setIsSearchOpen(false)
-                      }
-                    }}
-                  />
+                  <div className="relative hidden md:block">
+                    <svg
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                      className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 fill-zinc-400"
+                    >
+                      <path d="M10.5 3a7.5 7.5 0 0 1 5.96 12.05l4.75 4.75a1 1 0 0 1-1.42 1.41l-4.75-4.74A7.5 7.5 0 1 1 10.5 3Zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Z" />
+                    </svg>
+                    <input
+                      type="search"
+                      value={searchQuery}
+                      onChange={(event) => setSearchQuery(event.target.value)}
+                      className="h-11 w-[300px] rounded-full border border-slate-700 bg-zinc-800/50 py-2 pl-9 pr-4 text-sm text-zinc-100 outline-none transition focus:border-emerald-300/70 focus:ring-2 focus:ring-emerald-300/30"
+                      placeholder="Buscar item"
+                      aria-label="Buscar por título ou descrição"
+                    />
+                  </div>
                 </div>
               </div>
+
+              {isSearchOpen && (
+                <div className="fixed inset-x-0 top-24 z-50 px-2 md:hidden">
+                  <div className="mx-auto flex h-11 w-[90%] max-w-md items-center gap-2 rounded-full border border-slate-700 bg-zinc-800 px-3 shadow-lg">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4 shrink-0 fill-zinc-400">
+                      <path d="M10.5 3a7.5 7.5 0 0 1 5.96 12.05l4.75 4.75a1 1 0 0 1-1.42 1.41l-4.75-4.74A7.5 7.5 0 1 1 10.5 3Zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Z" />
+                    </svg>
+                    <input
+                      type="search"
+                      value={searchQuery}
+                      onChange={(event) => setSearchQuery(event.target.value)}
+                      className="h-full min-w-0 flex-1 bg-transparent py-2 text-sm text-zinc-100 outline-none placeholder:text-zinc-400"
+                      placeholder="Buscar item"
+                      aria-label="Buscar por título ou descrição"
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-zinc-200"
+                      aria-label="Fechar busca"
+                      onClick={() => setIsSearchOpen(false)}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+              )}
             </section>
           )}
 
