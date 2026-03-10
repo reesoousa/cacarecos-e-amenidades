@@ -59,6 +59,9 @@ function AdminDashboard() {
     mobile: { file: null, preview: '', existingUrl: '' },
   })
   const [bannerUploadLoading, setBannerUploadLoading] = useState({ desktop: false, mobile: false })
+  const [isBannerSectionOpen, setIsBannerSectionOpen] = useState(false)
+  const [isProductsSectionOpen, setIsProductsSectionOpen] = useState(false)
+  const [isFormSectionOpen, setIsFormSectionOpen] = useState(true)
 
   const getBannerPublicUrl = (fileName) => {
     const {
@@ -164,6 +167,7 @@ function AdminDashboard() {
   }
 
   const handleEditProduct = (product) => {
+    setIsFormSectionOpen(true)
     setEditingProductId(product.id)
     setSelectedImages(
       (product.fotos ?? []).map((url, index) => ({
@@ -455,240 +459,296 @@ function AdminDashboard() {
       )}
       {error && <p className="admin-feedback admin-feedback--error">{error}</p>}
 
-      <section className="admin-panel admin-banner-section" aria-label="Gestão dos banners da home">
-        <h2>Banner da Home</h2>
-        <div className="admin-banner-grid">
-          {Object.values(BANNER_CONFIG).map((banner) => {
-            const bannerData = bannerImages[banner.key]
-            const previewUrl = bannerData.preview || bannerData.existingUrl
+      <section className="admin-layout" aria-label="Gestão administrativa">
+        <article className="admin-panel admin-accordion w-full">
+          <button
+            type="button"
+            className="admin-accordion__summary"
+            onClick={() => setIsBannerSectionOpen((prev) => !prev)}
+            aria-expanded={isBannerSectionOpen}
+          >
+            <h2>Banner da Home</h2>
+            <span>{isBannerSectionOpen ? '−' : '+'}</span>
+          </button>
 
-            return (
-              <div key={banner.key} className="admin-banner-block">
-                <p className="admin-image-upload__label">{banner.label}</p>
-                <label
-                  className="admin-dropzone"
-                  onDragOver={(event) => event.preventDefault()}
-                  onDrop={(event) => {
-                    event.preventDefault()
-                    handleSelectBanner(banner.key, event.dataTransfer?.files)
-                  }}
-                >
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="admin-file-input-hidden"
-                    onChange={(event) => handleSelectBanner(banner.key, event.target.files)}
-                  />
-                  {previewUrl ? (
-                    <img src={previewUrl} alt={`Pré-visualização do ${banner.label}`} className="admin-dropzone__preview" />
-                  ) : (
-                    <span className="admin-dropzone__text">Arraste uma imagem aqui ou clique para selecionar</span>
-                  )}
-                </label>
-                <p className="admin-image-upload__hint">{banner.helperText}</p>
-                <button
-                  type="button"
-                  className="admin-upload-button"
-                  onClick={() => handleUploadBanner(banner.key)}
-                  disabled={bannerUploadLoading[banner.key]}
-                >
-                  {bannerUploadLoading[banner.key] ? 'Salvando banner...' : 'Salvar banner'}
-                </button>
-              </div>
-            )
-          })}
-        </div>
-      </section>
+          {isBannerSectionOpen && (
+            <div className="admin-accordion__content" aria-label="Gestão dos banners da home">
+              <div className="admin-banner-grid">
+                {Object.values(BANNER_CONFIG).map((banner) => {
+                  const bannerData = bannerImages[banner.key]
+                  const previewUrl = bannerData.preview || bannerData.existingUrl
 
-      <div className="admin-section-separator" aria-hidden="true" />
-
-      <section className="admin-layout" aria-label="Gestão de produtos">
-        <article className="admin-panel">
-          <h2>Produtos cadastrados</h2>
-
-          {isLoading ? (
-            <ul className="admin-product-list" role="status" aria-live="polite" aria-label="Carregando produtos">
-              {Array.from({ length: 4 }).map((_, index) => (
-                <li key={`admin-skeleton-${index}`} className="admin-product-card admin-product-card--skeleton">
-                  <Skeleton className="admin-skeleton__image" />
-                  <div className="admin-product-card__info">
-                    <Skeleton className="admin-skeleton__line admin-skeleton__line--title" />
-                    <Skeleton className="admin-skeleton__line admin-skeleton__line--price" />
-                    <Skeleton className="admin-skeleton__badge" />
-                  </div>
-                  <div className="admin-product-card__actions">
-                    <Skeleton className="admin-skeleton__button" />
-                    <Skeleton className="admin-skeleton__button" />
-                    <Skeleton className="admin-skeleton__button" />
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : produtos.length === 0 ? (
-            <p className="admin-panel__placeholder">Nenhum produto cadastrado ainda.</p>
-          ) : (
-            <ul className="admin-product-list">
-              {produtos.map((product) => {
-                const coverImage = Array.isArray(product.fotos) && product.fotos.length > 0 ? product.fotos[0] : PRODUCT_PLACEHOLDER_IMAGE
-                const isReserved = product.status?.toLowerCase() === 'reservado'
-                const isActionLoading = actionLoadingId === product.id
-
-                return (
-                  <li key={product.id} className="admin-product-card">
-                    <img src={coverImage} alt={product.nome} />
-                    <div className="admin-product-card__info">
-                      <h3>{product.nome}</h3>
-                      <p>{typeof product.preco === 'number' ? priceFormatter.format(product.preco) : 'Doação'}</p>
-                      <span className={`admin-status ${isReserved ? 'is-reserved' : 'is-available'}`}>
-                        {isReserved ? 'Reservado' : 'Disponível'}
-                      </span>
-                    </div>
-
-                    <div className="admin-product-card__actions">
-                      <button type="button" onClick={() => handleEditProduct(product)} disabled={isActionLoading}>
-                        Editar
-                      </button>
-                      <button type="button" onClick={() => handleToggleStatus(product)} disabled={isActionLoading}>
-                        {isReserved ? 'Marcar como Disponível' : 'Marcar como Reservado'}
-                      </button>
+                  return (
+                    <div key={banner.key} className="admin-banner-block">
+                      <p className="admin-image-upload__label">{banner.label}</p>
+                      <label
+                        className="admin-dropzone"
+                        onDragOver={(event) => event.preventDefault()}
+                        onDrop={(event) => {
+                          event.preventDefault()
+                          handleSelectBanner(banner.key, event.dataTransfer?.files)
+                        }}
+                      >
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="admin-file-input-hidden"
+                          onChange={(event) => handleSelectBanner(banner.key, event.target.files)}
+                        />
+                        {previewUrl ? (
+                          <img src={previewUrl} alt={`Pré-visualização do ${banner.label}`} className="admin-dropzone__preview" />
+                        ) : (
+                          <span className="admin-dropzone__text">Arraste uma imagem aqui ou clique para selecionar</span>
+                        )}
+                      </label>
+                      <p className="admin-image-upload__hint">{banner.helperText}</p>
                       <button
                         type="button"
-                        className="admin-danger-button"
-                        onClick={() => handleDelete(product.id)}
-                        disabled={isActionLoading}
+                        className="admin-upload-button"
+                        onClick={() => handleUploadBanner(banner.key)}
+                        disabled={bannerUploadLoading[banner.key]}
                       >
-                        Excluir
+                        {bannerUploadLoading[banner.key] ? 'Salvando banner...' : 'Salvar banner'}
                       </button>
                     </div>
-                  </li>
-                )
-              })}
-            </ul>
+                  )
+                })}
+              </div>
+            </div>
           )}
         </article>
 
-        <article className="admin-panel">
-          <h2>{editingProductId ? 'Editar Produto' : 'Novo Produto'}</h2>
+        <article className="admin-panel admin-accordion w-full">
+          <button
+            type="button"
+            className="admin-accordion__summary"
+            onClick={() => setIsProductsSectionOpen((prev) => !prev)}
+            aria-expanded={isProductsSectionOpen}
+          >
+            <h2>Produtos Cadastrados</h2>
+            <span>{isProductsSectionOpen ? '−' : '+'}</span>
+          </button>
 
-          <form className="admin-form" onSubmit={handleSubmitProduct}>
-            <label htmlFor="nome">Nome</label>
-            <input id="nome" name="nome" value={formData.nome} onChange={handleFormChange} required />
-
-            <label htmlFor="descricao">Descrição</label>
-            <textarea id="descricao" name="descricao" value={formData.descricao} onChange={handleFormChange} rows={3} required />
-
-            <label htmlFor="preco">Preço</label>
-            <input id="preco" name="preco" type="number" min="0" step="0.01" value={formData.preco} onChange={handleFormChange} />
-
-            <label htmlFor="categoria">Categoria</label>
-            <select id="categoria" name="categoria" value={formData.categoria} onChange={handleFormChange}>
-              <option value="Venda">Venda</option>
-              <option value="Doação">Doação</option>
-            </select>
-
-            <label htmlFor="subcategoria">Subcategoria</label>
-            <select id="subcategoria" name="subcategoria" value={formData.subcategoria} onChange={handleFormChange} required>
-              <option value="">Selecione</option>
-              <option value="Móveis">Móveis</option>
-              <option value="Decoração">Decoração</option>
-              <option value="Eletrodomésticos">Eletrodomésticos</option>
-              <option value="Eletrônicos">Eletrônicos</option>
-              <option value="Utensílios">Utensílios</option>
-              <option value="Outros">Outros</option>
-            </select>
-
-            <label htmlFor="estado_uso">Estado de uso</label>
-            <select id="estado_uso" name="estado_uso" value={formData.estado_uso} onChange={handleFormChange}>
-              <option value="Novo">Novo</option>
-              <option value="Seminovo">Seminovo</option>
-              <option value="Bom estado">Bom estado</option>
-              <option value="Com avarias">Com avarias</option>
-            </select>
-
-            <label htmlFor="motivo_desapego">Motivo do desapego</label>
-            <input
-              id="motivo_desapego"
-              name="motivo_desapego"
-              value={formData.motivo_desapego}
-              onChange={handleFormChange}
-              required
-            />
-
-            <label htmlFor="dimensoes">Dimensões</label>
-            <input id="dimensoes" name="dimensoes" value={formData.dimensoes} onChange={handleFormChange} />
-
-            <div className="admin-image-upload">
-              <p className="admin-image-upload__label">Fotos do produto</p>
-              <input
-                id="imagem"
-                ref={fileInputRef}
-                name="imagem"
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleSelectImages}
-                required={!editingProductId && selectedImages.length === 0}
-                className="admin-file-input-hidden"
-              />
-              <button type="button" className="admin-upload-button" onClick={() => fileInputRef.current?.click()}>
-                Adicionar Fotos
-              </button>
-              <p className="admin-image-upload__hint">
-                Arraste para reordenar. A primeira imagem será usada como capa na vitrine.
-              </p>
-
-              {selectedImages.length > 0 && (
-                <div className="admin-image-preview-grid" aria-label="Pré-visualização das fotos">
-                  {selectedImages.map((image, index) => (
-                    <div
-                      key={image.id}
-                      className={`admin-image-preview ${index === 0 ? 'is-cover' : ''} ${draggedIndex === index ? 'is-dragging' : ''}`}
-                      draggable
-                      onDragStart={() => setDraggedIndex(index)}
-                      onDragEnter={() => handleMoveImage(draggedIndex, index)}
-                      onDragOver={(event) => event.preventDefault()}
-                      onDragEnd={() => setDraggedIndex(null)}
-                    >
-                      {index === 0 && <span className="admin-image-preview__badge">Capa</span>}
-                      <img src={image.preview} alt={`Prévia da imagem ${index + 1}`} />
-                      <button type="button" onClick={() => handleRemoveImage(image.id)} className="admin-image-preview__remove">
-                        Remover
-                      </button>
-                    </div>
+          {isProductsSectionOpen && (
+            <div className="admin-accordion__content">
+              {isLoading ? (
+                <ul className="admin-product-list" role="status" aria-live="polite" aria-label="Carregando produtos">
+                  {Array.from({ length: 4 }).map((_, index) => (
+                    <li key={`admin-skeleton-${index}`} className="admin-product-card admin-product-card--skeleton">
+                      <Skeleton className="admin-skeleton__image" />
+                      <div className="admin-product-card__info">
+                        <Skeleton className="admin-skeleton__line admin-skeleton__line--title" />
+                        <Skeleton className="admin-skeleton__line admin-skeleton__line--price" />
+                        <Skeleton className="admin-skeleton__badge" />
+                      </div>
+                      <div className="admin-product-card__actions">
+                        <Skeleton className="admin-skeleton__button" />
+                        <Skeleton className="admin-skeleton__button" />
+                        <Skeleton className="admin-skeleton__button" />
+                      </div>
+                    </li>
                   ))}
-                </div>
+                </ul>
+              ) : produtos.length === 0 ? (
+                <p className="admin-panel__placeholder">Nenhum produto cadastrado ainda.</p>
+              ) : (
+                <ul className="admin-product-list">
+                  {produtos.map((product) => {
+                    const coverImage = Array.isArray(product.fotos) && product.fotos.length > 0 ? product.fotos[0] : PRODUCT_PLACEHOLDER_IMAGE
+                    const isReserved = product.status?.toLowerCase() === 'reservado'
+                    const isActionLoading = actionLoadingId === product.id
+
+                    return (
+                      <li key={product.id} className="admin-product-card">
+                        <img src={coverImage} alt={product.nome} />
+                        <div className="admin-product-card__info">
+                          <h3>{product.nome}</h3>
+                          <p>{typeof product.preco === 'number' ? priceFormatter.format(product.preco) : 'Doação'}</p>
+                          <span className={`admin-status ${isReserved ? 'is-reserved' : 'is-available'}`}>
+                            {isReserved ? 'Reservado' : 'Disponível'}
+                          </span>
+                        </div>
+
+                        <div className="admin-product-card__actions">
+                          <button type="button" onClick={() => handleEditProduct(product)} disabled={isActionLoading}>
+                            Editar
+                          </button>
+                          <button type="button" onClick={() => handleToggleStatus(product)} disabled={isActionLoading}>
+                            {isReserved ? 'Marcar como Disponível' : 'Marcar como Reservado'}
+                          </button>
+                          <button
+                            type="button"
+                            className="admin-danger-button"
+                            onClick={() => handleDelete(product.id)}
+                            disabled={isActionLoading}
+                          >
+                            Excluir
+                          </button>
+                        </div>
+                      </li>
+                    )
+                  })}
+                </ul>
               )}
             </div>
-
-            <label className="admin-checkbox" htmlFor="is_feito_a_mao">
-              <input
-                id="is_feito_a_mao"
-                name="is_feito_a_mao"
-                type="checkbox"
-                checked={formData.is_feito_a_mao}
-                onChange={handleFormChange}
-              />
-              Produto feito à mão
-            </label>
-
-            <button type="submit" disabled={isSubmitting || (!editingProductId && !hasNewImages && selectedImages.length === 0)}>
-              {isSubmitting
-                ? editingProductId
-                  ? 'Atualizando produto...'
-                  : 'Salvando produto...'
-                : editingProductId
-                  ? 'Atualizar produto'
-                  : 'Salvar produto'}
-            </button>
-
-            {editingProductId && (
-              <button type="button" className="admin-ghost-button" onClick={resetForm}>
-                Cancelar edição
-              </button>
-            )}
-          </form>
+          )}
         </article>
 
+        <article className="admin-panel admin-accordion w-full">
+          <button
+            type="button"
+            className="admin-accordion__summary"
+            onClick={() => setIsFormSectionOpen((prev) => !prev)}
+            aria-expanded={isFormSectionOpen}
+          >
+            <h2>{editingProductId ? 'Editar Produto' : 'Novo Produto'}</h2>
+            <span>{isFormSectionOpen ? '−' : '+'}</span>
+          </button>
+
+          {isFormSectionOpen && (
+            <div className="admin-accordion__content">
+              <form className="admin-form" onSubmit={handleSubmitProduct}>
+                <div className="admin-form-grid">
+                  <div className="admin-form-field admin-form-field--full">
+                    <label htmlFor="nome">Nome</label>
+                    <input id="nome" name="nome" value={formData.nome} onChange={handleFormChange} required />
+                  </div>
+
+                  <div className="admin-form-field admin-form-field--full">
+                    <label htmlFor="descricao">Descrição</label>
+                    <textarea id="descricao" name="descricao" value={formData.descricao} onChange={handleFormChange} rows={3} required />
+                  </div>
+
+                  <div className="admin-form-field">
+                    <label htmlFor="preco">Preço</label>
+                    <input id="preco" name="preco" type="number" min="0" step="0.01" value={formData.preco} onChange={handleFormChange} />
+                  </div>
+
+                  <div className="admin-form-field">
+                    <label htmlFor="estado_uso">Estado de uso</label>
+                    <select id="estado_uso" name="estado_uso" value={formData.estado_uso} onChange={handleFormChange}>
+                      <option value="Novo">Novo</option>
+                      <option value="Seminovo">Seminovo</option>
+                      <option value="Bom estado">Bom estado</option>
+                      <option value="Com avarias">Com avarias</option>
+                    </select>
+                  </div>
+
+                  <div className="admin-form-field">
+                    <label htmlFor="categoria">Categoria</label>
+                    <select id="categoria" name="categoria" value={formData.categoria} onChange={handleFormChange}>
+                      <option value="Venda">Venda</option>
+                      <option value="Doação">Doação</option>
+                    </select>
+                  </div>
+
+                  <div className="admin-form-field">
+                    <label htmlFor="subcategoria">Subcategoria</label>
+                    <select id="subcategoria" name="subcategoria" value={formData.subcategoria} onChange={handleFormChange} required>
+                      <option value="">Selecione</option>
+                      <option value="Móveis">Móveis</option>
+                      <option value="Decoração">Decoração</option>
+                      <option value="Eletrodomésticos">Eletrodomésticos</option>
+                      <option value="Eletrônicos">Eletrônicos</option>
+                      <option value="Utensílios">Utensílios</option>
+                      <option value="Outros">Outros</option>
+                    </select>
+                  </div>
+
+                  <div className="admin-form-field">
+                    <label htmlFor="motivo_desapego">Motivo do desapego</label>
+                    <input
+                      id="motivo_desapego"
+                      name="motivo_desapego"
+                      value={formData.motivo_desapego}
+                      onChange={handleFormChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="admin-form-field">
+                    <label htmlFor="dimensoes">Dimensões</label>
+                    <input id="dimensoes" name="dimensoes" value={formData.dimensoes} onChange={handleFormChange} />
+                  </div>
+
+                  <div className="admin-form-field admin-form-field--full">
+                    <div className="admin-image-upload">
+                      <p className="admin-image-upload__label">Fotos do produto</p>
+                      <input
+                        id="imagem"
+                        ref={fileInputRef}
+                        name="imagem"
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleSelectImages}
+                        required={!editingProductId && selectedImages.length === 0}
+                        className="admin-file-input-hidden"
+                      />
+                      <button type="button" className="admin-upload-button" onClick={() => fileInputRef.current?.click()}>
+                        Adicionar Fotos
+                      </button>
+                      <p className="admin-image-upload__hint">
+                        Arraste para reordenar. A primeira imagem será usada como capa na vitrine.
+                      </p>
+
+                      {selectedImages.length > 0 && (
+                        <div className="admin-image-preview-grid" aria-label="Pré-visualização das fotos">
+                          {selectedImages.map((image, index) => (
+                            <div
+                              key={image.id}
+                              className={`admin-image-preview ${index === 0 ? 'is-cover' : ''} ${draggedIndex === index ? 'is-dragging' : ''}`}
+                              draggable
+                              onDragStart={() => setDraggedIndex(index)}
+                              onDragEnter={() => handleMoveImage(draggedIndex, index)}
+                              onDragOver={(event) => event.preventDefault()}
+                              onDragEnd={() => setDraggedIndex(null)}
+                            >
+                              {index === 0 && <span className="admin-image-preview__badge">Capa</span>}
+                              <img src={image.preview} alt={`Prévia da imagem ${index + 1}`} />
+                              <button type="button" onClick={() => handleRemoveImage(image.id)} className="admin-image-preview__remove">
+                                Remover
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="admin-form-field admin-form-field--full">
+                    <label className="admin-checkbox" htmlFor="is_feito_a_mao">
+                      <input
+                        id="is_feito_a_mao"
+                        name="is_feito_a_mao"
+                        type="checkbox"
+                        checked={formData.is_feito_a_mao}
+                        onChange={handleFormChange}
+                      />
+                      Produto feito à mão
+                    </label>
+                  </div>
+                </div>
+
+                <button type="submit" disabled={isSubmitting || (!editingProductId && !hasNewImages && selectedImages.length === 0)}>
+                  {isSubmitting
+                    ? editingProductId
+                      ? 'Atualizando produto...'
+                      : 'Salvando produto...'
+                    : editingProductId
+                      ? 'Atualizar produto'
+                      : 'Salvar produto'}
+                </button>
+
+                {editingProductId && (
+                  <button type="button" className="admin-ghost-button" onClick={resetForm}>
+                    Cancelar edição
+                  </button>
+                )}
+              </form>
+            </div>
+          )}
+        </article>
       </section>
     </main>
   )

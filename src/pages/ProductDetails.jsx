@@ -31,6 +31,10 @@ function ProductDetails() {
   const [isRecommendationsLoading, setIsRecommendationsLoading] = useState(true)
 
   useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  }, [id])
+
+  useEffect(() => {
     const fetchProduct = async () => {
       setIsLoading(true)
       setError(null)
@@ -182,7 +186,12 @@ function ProductDetails() {
           <div className="product-gallery-mobile hide-scrollbar" aria-label="Galeria mobile">
             {galleryImages.map((image, index) => (
               <button key={`${image}-${index}`} type="button" className="product-gallery-mobile__item" onClick={() => setLightboxImage(image)}>
-                <img src={image} alt={`Foto ${index + 1} de ${produto.nome}`} loading="lazy" className="w-full h-full object-cover" />
+                <img
+                  src={image}
+                  alt={`Foto ${index + 1} de ${produto.nome}`}
+                  loading="lazy"
+                  className="w-full h-full object-cover product-gallery-mobile__image"
+                />
               </button>
             ))}
           </div>
