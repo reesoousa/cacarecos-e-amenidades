@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import ProductCard from '../components/ProductCard'
 import Preloader from '../components/Preloader'
 import Skeleton from '../components/Skeleton'
@@ -81,6 +81,8 @@ function Home() {
   const [storeMode, setStoreMode] = useState(STORE_MODES.desapegos)
   const [bannerUrls, setBannerUrls] = useState({ desktop: '', mobile: '' })
   const [isBannerLoading, setIsBannerLoading] = useState(true)
+  const [filtersStuck, setFiltersStuck] = useState(false)
+  const filterBarRef = useRef(null)
 
   const isAtelieMode = storeMode === STORE_MODES.atelie
 
@@ -101,6 +103,15 @@ function Home() {
       document.body.classList.remove('theme-atelie')
     }
   }, [isAtelieMode])
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (!filterBarRef.current) return
+      setFiltersStuck(filterBarRef.current.getBoundingClientRect().top <= 13)
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   useEffect(() => {
     const fetchProdutos = async () => {
@@ -276,7 +287,7 @@ function Home() {
       {!isLoading && !error && (
         <>
           {!isAtelieMode && (
-            <section className="filters-bar" aria-label="Filtros de busca">
+            <section ref={filterBarRef} className={`filters-bar${filtersStuck ? ' is-scrolled' : ''}`} aria-label="Filtros de busca">
               <div className="filters-row">
                 <div className="filters-scroll-area">
                   <div className="filters-tabs hide-scrollbar">

@@ -177,6 +177,10 @@ body.theme-atelie {
   z-index: 20;
 }
 
+.filters-bar.is-scrolled {
+  margin-inline: 1.25rem;
+}
+
 .filters-divider {
   display: block;
   width: 1px;
@@ -1223,6 +1227,11 @@ body {
 .product-info,
 .site-footer {
   transition: color 450ms ease, background-color 450ms ease, border-color 450ms ease, box-shadow 450ms ease;
+}
+
+.filters-bar {
+  transition: color 450ms ease, background-color 450ms ease, border-color 450ms ease, box-shadow 450ms ease,
+    margin-inline 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .home-hero__logo {
