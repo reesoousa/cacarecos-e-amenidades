@@ -271,38 +271,48 @@ function Home() {
           {!isAtelieMode && (
             <section className="filters-bar" aria-label="Filtros de busca">
               <div className="filters-row">
-                <div className="filters-tabs hide-scrollbar">
-                  {PRIMARY_TABS.map((tab) => (
-                    <button
-                      key={tab.key}
-                      type="button"
-                      className={`filters-tab ${activeTab === tab.key ? 'is-active' : ''}`}
-                      onClick={() => { setActiveTab(tab.key); setActiveSubcategory('todas') }}
-                      aria-pressed={activeTab === tab.key}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
+                <div className="filters-scroll-area">
+                  <div className="filters-tabs hide-scrollbar">
+                    {PRIMARY_TABS.map((tab) => (
+                      <button
+                        key={tab.key}
+                        type="button"
+                        className={`filters-tab ${activeTab === tab.key ? 'is-active' : ''}`}
+                        onClick={() => { setActiveTab(tab.key); setActiveSubcategory('todas') }}
+                        aria-pressed={activeTab === tab.key}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
 
-                  {availableSubcategories.length > 0 && (
-                    <>
-                      <span className="filters-divider" aria-hidden="true" />
-                      {availableSubcategories.map((sub) => (
-                        <button
-                          key={sub}
-                          type="button"
-                          className={`subcategory-chip ${activeSubcategory === sub ? 'is-active' : ''}`}
-                          onClick={() => setActiveSubcategory(activeSubcategory === sub ? 'todas' : sub)}
-                          aria-pressed={activeSubcategory === sub}
-                        >
-                          {sub}
-                        </button>
-                      ))}
-                    </>
-                  )}
+                    {availableSubcategories.length > 0 && (
+                      <>
+                        <span className="filters-divider" aria-hidden="true" />
+                        {availableSubcategories.map((sub) => (
+                          <button
+                            key={sub}
+                            type="button"
+                            className={`subcategory-chip ${activeSubcategory === sub ? 'is-active' : ''}`}
+                            onClick={() => setActiveSubcategory(activeSubcategory === sub ? 'todas' : sub)}
+                            aria-pressed={activeSubcategory === sub}
+                          >
+                            {sub}
+                          </button>
+                        ))}
+                      </>
+                    )}
+                  </div>
                 </div>
 
                 <div className="filters-sort-wrapper">
+                  <div className="filters-sort-display" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M3 18h6v-2H3v2zm0-5h12v-2H3v2zm0-7v2h18V6H3z" />
+                    </svg>
+                    <span className="filters-sort-label">
+                      {sortOrder === 'recentes' ? 'Recentes' : sortOrder === 'preco-asc' ? 'Menor preço' : 'Maior preço'}
+                    </span>
+                  </div>
                   <select
                     className="filters-sort"
                     value={sortOrder}
@@ -313,9 +323,6 @@ function Home() {
                     <option value="preco-asc">Menor preço</option>
                     <option value="preco-desc">Maior preço</option>
                   </select>
-                  <svg className="filters-sort-icon" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M7 10l5 5 5-5z" />
-                  </svg>
                 </div>
               </div>
             </section>
