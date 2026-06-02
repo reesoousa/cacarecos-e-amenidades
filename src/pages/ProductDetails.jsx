@@ -98,6 +98,14 @@ function ProductDetails() {
     fetchRecommendations()
   }, [produto])
 
+  const galleryImages = useMemo(() => {
+    if (!produto || !Array.isArray(produto.fotos) || produto.fotos.length === 0) {
+      return [PRODUCT_PLACEHOLDER_IMAGE]
+    }
+
+    return produto.fotos
+  }, [produto])
+
   useEffect(() => {
     if (lightboxIndex === null) {
       return undefined
@@ -115,14 +123,6 @@ function ProductDetails() {
       window.removeEventListener('keydown', handleKeyDown)
     }
   }, [lightboxIndex, galleryImages.length])
-
-  const galleryImages = useMemo(() => {
-    if (!produto || !Array.isArray(produto.fotos) || produto.fotos.length === 0) {
-      return [PRODUCT_PLACEHOLDER_IMAGE]
-    }
-
-    return produto.fotos
-  }, [produto])
 
   const featuredImage = galleryImages[0]
   const secondaryImages = galleryImages.slice(1, 5)
