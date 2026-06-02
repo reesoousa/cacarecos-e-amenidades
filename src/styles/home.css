@@ -1180,22 +1180,15 @@ body {
 }
 
 .home-hero__logo {
-  border: 0;
-  background: transparent;
-  border-radius: 0;
-  width: max-content;
-  margin: 0;
   display: flex;
-  flex-direction: column;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
-  font-size: clamp(1.35rem, 5vw, 1.8rem);
-  font-weight: 800;
-  color: var(--text-main);
+  align-items: center;
 }
 
-.home-hero__logo-line--mobile {
-  display: inline;
+.home-hero__logo-img {
+  display: block;
+  height: 56px;
+  width: auto;
+  user-select: none;
 }
 
 .store-mode-switch {
@@ -1277,15 +1270,8 @@ body {
 }
 
 @media (min-width: 840px) {
-  .home-hero__logo {
-    flex-direction: row;
-    align-items: center;
-    gap: 0.45rem;
-    line-height: 1;
-  }
-
-  .home-hero__logo-line--mobile::after {
-    content: '';
+  .home-hero__logo-img {
+    height: 40px;
   }
 
   .store-mode-switch {

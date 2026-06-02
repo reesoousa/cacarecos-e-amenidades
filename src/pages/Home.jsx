@@ -3,6 +3,10 @@ import ProductCard from '../components/ProductCard'
 import Skeleton from '../components/Skeleton'
 import { supabase } from '../services/supabaseClient'
 import '../styles/home.css'
+import logoWhiteRetangular from '../visual-id/logo-cacarecos-white-retangular.svg'
+import logoBlackRetangular from '../visual-id/logo-cacarecos-black-retangular.svg'
+import logoWhiteLine from '../visual-id/logo-cacarecos-white-line.svg'
+import logoBlackLine from '../visual-id/logo-cacarecos-black-line.svg'
 
 const PRIMARY_TABS = [
   { key: 'todos', label: 'Todos' },
@@ -164,8 +168,15 @@ function Home() {
       <header className={`home-hero ${isAtelieMode ? 'is-atelie' : ''}`}>
         <div className="home-hero__brand-row">
           <div className="home-hero__logo" aria-label="Logo Cacarecos & Amenidades">
-            <span className="home-hero__logo-line home-hero__logo-line--mobile">Cacarecos &amp;</span>
-            <span className="home-hero__logo-line">Amenidades</span>
+            <picture>
+              <source media="(min-width: 840px)" srcSet={isAtelieMode ? logoBlackLine : logoWhiteLine} />
+              <img
+                src={isAtelieMode ? logoBlackRetangular : logoWhiteRetangular}
+                alt="Cacarecos & Amenidades"
+                className="home-hero__logo-img"
+                draggable="false"
+              />
+            </picture>
           </div>
 
           <div className="store-mode-switch" role="tablist" aria-label="Modo da loja">
