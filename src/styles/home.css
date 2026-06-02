@@ -1182,6 +1182,9 @@ body {
 .home-hero__logo {
   display: flex;
   align-items: center;
+  border: none;
+  background: transparent;
+  border-radius: 0;
 }
 
 .home-hero__logo-img {
