@@ -1,0 +1,40 @@
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #2cbf6e;
+  display: grid;
+  place-items: center;
+  animation: preloader-exit 0.32s ease-in 0.88s forwards;
+}
+
+.preloader__logo {
+  width: min(160px, 38vw);
+  height: auto;
+  animation: preloader-logo 0.82s ease-out forwards;
+  transform-origin: center bottom;
+}
+
+@keyframes preloader-logo {
+  /* entrada: sobe com overshoot */
+  0%   { transform: translateY(36px); opacity: 0; }
+  28%  { opacity: 1; }
+  44%  { transform: translateY(-8px); }
+  54%  { transform: translateY(0); }
+
+  /* squash na aterrissagem */
+  60%  { transform: scaleX(1.18) scaleY(0.82); }
+  70%  { transform: scaleX(0.93) scaleY(1.1); }
+  78%  { transform: scaleX(1.04) scaleY(0.96); }
+  84%  { transform: scale(1); }
+
+  /* pop pulse final */
+  90%  { transform: scale(1.07); }
+  96%  { transform: scale(0.98); }
+  100% { transform: scale(1); }
+}
+
+@keyframes preloader-exit {
+  0%   { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.05); }
+}

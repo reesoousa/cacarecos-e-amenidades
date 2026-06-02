@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import ProductCard from '../components/ProductCard'
+import Preloader from '../components/Preloader'
 import Skeleton from '../components/Skeleton'
 import { supabase } from '../services/supabaseClient'
 import '../styles/home.css'
@@ -66,6 +67,11 @@ const getCategoryType = (categoria) => {
 }
 
 function Home() {
+  const [showPreloader, setShowPreloader] = useState(() => {
+    if (sessionStorage.getItem('preloader-shown')) return false
+    sessionStorage.setItem('preloader-shown', '1')
+    return true
+  })
   const [produtos, setProdutos] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -164,6 +170,7 @@ function Home() {
 
   return (
     <main className={`home-page ${isAtelieMode ? 'is-atelie' : ''}`}>
+      {showPreloader && <Preloader onComplete={() => setShowPreloader(false)} />}
       <div className={`theme-wave-layer ${isAtelieMode ? 'is-atelie' : ''}`} aria-hidden="true" />
       <header className={`home-hero ${isAtelieMode ? 'is-atelie' : ''}`}>
         <div className="home-hero__brand-row">
