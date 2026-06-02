@@ -572,9 +572,14 @@ function AdminDashboard() {
                       <div className="admin-product-card__info">
                         <h3>{product.nome}</h3>
                         <p>{typeof product.preco === 'number' ? priceFormatter.format(product.preco) : 'Doação'}</p>
-                        <span className={`admin-status ${isReserved ? 'is-reserved' : 'is-available'}`}>
-                          {isReserved ? 'Reservado' : 'Disponível'}
-                        </span>
+                        <div className="admin-product-card__meta">
+                          <span className={`admin-status ${isReserved ? 'is-reserved' : 'is-available'}`}>
+                            {isReserved ? 'Reservado' : 'Disponível'}
+                          </span>
+                          {typeof product.view_count === 'number' && (
+                            <span className="admin-view-count">{product.view_count} viz.</span>
+                          )}
+                        </div>
                       </div>
                       <div className="admin-product-card__actions">
                         <button type="button" onClick={() => handleEditProduct(product)} disabled={isActionLoading}>
@@ -639,27 +644,50 @@ function AdminDashboard() {
 
               <div className="admin-form-field">
                 <label htmlFor="subcategoria">Subcategoria</label>
-                <select id="subcategoria" name="subcategoria" value={formData.subcategoria} onChange={handleFormChange} required>
-                  <option value="">Selecione</option>
-                  <option value="Móveis">Móveis</option>
-                  <option value="Decoração">Decoração</option>
-                  <option value="Eletrodomésticos">Eletrodomésticos</option>
-                  <option value="Eletrônicos">Eletrônicos</option>
-                  <option value="Utensílios">Utensílios</option>
-                  <option value="Outros">Outros</option>
-                </select>
-              </div>
-
-              <div className="admin-form-field">
-                <label htmlFor="motivo_desapego">Motivo do desapego</label>
                 <input
-                  id="motivo_desapego"
-                  name="motivo_desapego"
-                  value={formData.motivo_desapego}
+                  id="subcategoria"
+                  name="subcategoria"
+                  list="subcategorias-list"
+                  value={formData.subcategoria}
                   onChange={handleFormChange}
+                  placeholder="Selecione ou digite"
                   required
                 />
+                <datalist id="subcategorias-list">
+                  <option value="Móveis" />
+                  <option value="Decoração" />
+                  <option value="Eletrodomésticos" />
+                  <option value="Eletrônicos" />
+                  <option value="Utensílios" />
+                  <option value="Outros" />
+                </datalist>
               </div>
+
+              <div className="admin-form-field admin-form-field--full">
+                <label className="admin-checkbox" htmlFor="is_feito_a_mao">
+                  <input
+                    id="is_feito_a_mao"
+                    name="is_feito_a_mao"
+                    type="checkbox"
+                    checked={formData.is_feito_a_mao}
+                    onChange={handleFormChange}
+                  />
+                  Produto feito à mão (Ateliê)
+                </label>
+              </div>
+
+              {!formData.is_feito_a_mao && (
+                <div className="admin-form-field">
+                  <label htmlFor="motivo_desapego">Motivo do desapego</label>
+                  <input
+                    id="motivo_desapego"
+                    name="motivo_desapego"
+                    value={formData.motivo_desapego}
+                    onChange={handleFormChange}
+                    required
+                  />
+                </div>
+              )}
 
               <div className="admin-form-field">
                 <label htmlFor="dimensoes">Dimensões</label>
@@ -710,18 +738,6 @@ function AdminDashboard() {
                 </div>
               </div>
 
-              <div className="admin-form-field admin-form-field--full">
-                <label className="admin-checkbox" htmlFor="is_feito_a_mao">
-                  <input
-                    id="is_feito_a_mao"
-                    name="is_feito_a_mao"
-                    type="checkbox"
-                    checked={formData.is_feito_a_mao}
-                    onChange={handleFormChange}
-                  />
-                  Produto feito à mão
-                </label>
-              </div>
             </div>
 
             <button type="submit" disabled={isSubmitting || (!editingProductId && !hasNewImages && selectedImages.length === 0)}>

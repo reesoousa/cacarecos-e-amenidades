@@ -659,6 +659,25 @@
   color: var(--text-muted);
 }
 
+/* ── VIEW COUNT ── */
+.admin-product-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.admin-status {
+  margin-top: 0;
+}
+
+.admin-view-count {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
 /* ── DELETE CONFIRMATION ── */
 .admin-danger-button.is-confirm {
   background: #991b1b !important;

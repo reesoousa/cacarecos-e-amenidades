@@ -47,6 +47,7 @@ function ProductDetails() {
         setProduto(null)
       } else {
         setProduto(data)
+        supabase.rpc('increment_view_count', { product_id: id })
       }
 
       setIsLoading(false)
