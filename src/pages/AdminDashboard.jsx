@@ -43,13 +43,11 @@ const BANNER_CONFIG = {
 }
 
 const STATUS_FILTERS = [
-  { key: 'todos', label: 'Todos' },
   { key: 'disponivel', label: 'Disponível' },
   { key: 'reservado', label: 'Reservado' },
 ]
 
 const CATEGORY_FILTERS = [
-  { key: 'todos', label: 'Todos' },
   { key: 'venda', label: 'Venda' },
   { key: 'doacao', label: 'Doação' },
   { key: 'amao', label: 'Feito à mão' },
@@ -504,19 +502,20 @@ function AdminDashboard() {
                       key={key}
                       type="button"
                       className={`admin-chip${statusFilter === key ? ' is-active' : ''}`}
-                      onClick={() => setStatusFilter(key)}
+                      onClick={() => setStatusFilter(statusFilter === key ? 'todos' : key)}
                     >
                       {label}
                     </button>
                   ))}
                 </div>
+                <span className="admin-filter-divider" aria-hidden="true" />
                 <div className="admin-chip-group">
                   {CATEGORY_FILTERS.map(({ key, label }) => (
                     <button
                       key={key}
                       type="button"
                       className={`admin-chip${categoryFilter === key ? ' is-active' : ''}`}
-                      onClick={() => setCategoryFilter(key)}
+                      onClick={() => setCategoryFilter(categoryFilter === key ? 'todos' : key)}
                     >
                       {label}
                     </button>

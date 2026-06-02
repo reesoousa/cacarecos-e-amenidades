@@ -614,8 +614,18 @@
 
 .admin-filter-row {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.admin-filter-divider {
+  width: 1px;
+  height: 18px;
+  background: var(--border);
+  border-radius: 1px;
+  flex-shrink: 0;
 }
 
 .admin-chip-group {
