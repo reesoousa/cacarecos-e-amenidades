@@ -260,19 +260,35 @@ function Home() {
           {!isAtelieMode && (
             <section className="filters-bar" aria-label="Filtros de busca">
               <div className="filters-row">
-                <div className="filters-tabs hide-scrollbar" role="tablist" aria-label="Tipo de anúncio">
+                <div className="filters-tabs hide-scrollbar">
                   {PRIMARY_TABS.map((tab) => (
                     <button
                       key={tab.key}
                       type="button"
                       className={`filters-tab ${activeTab === tab.key ? 'is-active' : ''}`}
                       onClick={() => { setActiveTab(tab.key); setActiveSubcategory('todas') }}
-                      role="tab"
-                      aria-selected={activeTab === tab.key}
+                      aria-pressed={activeTab === tab.key}
                     >
                       {tab.label}
                     </button>
                   ))}
+
+                  {availableSubcategories.length > 0 && (
+                    <>
+                      <span className="filters-divider" aria-hidden="true" />
+                      {availableSubcategories.map((sub) => (
+                        <button
+                          key={sub}
+                          type="button"
+                          className={`subcategory-chip ${activeSubcategory === sub ? 'is-active' : ''}`}
+                          onClick={() => setActiveSubcategory(activeSubcategory === sub ? 'todas' : sub)}
+                          aria-pressed={activeSubcategory === sub}
+                        >
+                          {sub}
+                        </button>
+                      ))}
+                    </>
+                  )}
                 </div>
 
                 <div className="filters-sort-wrapper">
@@ -291,28 +307,6 @@ function Home() {
                   </svg>
                 </div>
               </div>
-
-              {availableSubcategories.length > 0 && (
-                <div className="subcategories-chips hide-scrollbar" role="group" aria-label="Filtrar por subcategoria">
-                  <button
-                    type="button"
-                    className={`subcategory-chip ${activeSubcategory === 'todas' ? 'is-active' : ''}`}
-                    onClick={() => setActiveSubcategory('todas')}
-                  >
-                    Todas
-                  </button>
-                  {availableSubcategories.map((sub) => (
-                    <button
-                      key={sub}
-                      type="button"
-                      className={`subcategory-chip ${activeSubcategory === sub ? 'is-active' : ''}`}
-                      onClick={() => setActiveSubcategory(sub)}
-                    >
-                      {sub}
-                    </button>
-                  ))}
-                </div>
-              )}
             </section>
           )}
 
