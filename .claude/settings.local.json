@@ -1,7 +1,15 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(convert -version)",
+      "Bash(magick identify:*)",
+      "Bash(node -e \"require\\(''sharp''\\)\")",
+      "Bash(python3 -c \"from PIL import Image; print\\(''pillow ok''\\)\")",
+      "Bash(python -c \"from PIL import Image; print\\(''pillow ok''\\)\")",
+      "Bash(node -e \"const fs=require\\(''''fs''''\\); console.log\\(fs.existsSync\\(''''node_modules/sharp''''\\) ? ''''sharp exists'''' : ''''no sharp''''\\)\")",
+      "Bash(npm install:*)",
+      "Bash(node -e \":*)"
     ]
   }
 }
