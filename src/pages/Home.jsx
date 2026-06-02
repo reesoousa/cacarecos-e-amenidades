@@ -66,6 +66,8 @@ function Home() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
   const [activeTab, setActiveTab] = useState('todos')
+  const [activeSubcategory, setActiveSubcategory] = useState('todas')
+  const [sortOrder, setSortOrder] = useState('recentes')
   const [storeMode, setStoreMode] = useState(STORE_MODES.desapegos)
   const [bannerUrls, setBannerUrls] = useState({ desktop: '', mobile: '' })
   const [isBannerLoading, setIsBannerLoading] = useState(true)
@@ -133,16 +135,25 @@ function Home() {
     fetchBanners()
   }, [])
 
-  const filteredProducts = useMemo(() => {
-    if (isAtelieMode) {
-      return produtos.filter((item) => item.is_feito_a_mao === true)
-    }
-
-    return produtos.filter((item) => {
-      const matchesTab = activeTab === 'todos' || getCategoryType(item.categoria) === activeTab
-      return matchesTab
-    })
+  const tabFilteredProducts = useMemo(() => {
+    if (isAtelieMode) return produtos.filter((item) => item.is_feito_a_mao === true)
+    return produtos.filter((item) => activeTab === 'todos' || getCategoryType(item.categoria) === activeTab)
   }, [activeTab, isAtelieMode, produtos])
+
+  const availableSubcategories = useMemo(() => {
+    const subs = new Set(tabFilteredProducts.map((item) => item.subcategoria).filter(Boolean))
+    return [...subs].sort()
+  }, [tabFilteredProducts])
+
+  const filteredProducts = useMemo(() => {
+    let items = activeSubcategory !== 'todas'
+      ? tabFilteredProducts.filter((item) => item.subcategoria === activeSubcategory)
+      : tabFilteredProducts
+
+    if (sortOrder === 'preco-asc') return [...items].sort((a, b) => (a.preco ?? 0) - (b.preco ?? 0))
+    if (sortOrder === 'preco-desc') return [...items].sort((a, b) => (b.preco ?? 0) - (a.preco ?? 0))
+    return items
+  }, [tabFilteredProducts, activeSubcategory, sortOrder])
 
   const hasAnyBanner = Boolean(bannerUrls.desktop || bannerUrls.mobile)
   const shouldRenderBanner = !isAtelieMode && (isBannerLoading || hasAnyBanner)
@@ -170,7 +181,7 @@ function Home() {
                   aria-selected={isActive}
                   aria-label={option.label}
                   className={`store-mode-switch__button ${isActive ? 'is-active' : ''}`}
-                  onClick={() => setStoreMode(option.key)}
+                  onClick={() => { setStoreMode(option.key); setActiveSubcategory('todas'); setSortOrder('recentes') }}
                 >
                   <span className="store-mode-switch__icon">{option.icon}</span>
                   <span className="store-mode-switch__label">{option.label}</span>
@@ -249,13 +260,13 @@ function Home() {
           {!isAtelieMode && (
             <section className="filters-bar" aria-label="Filtros de busca">
               <div className="filters-row">
-                <div className="filters-tabs" role="tablist" aria-label="Tipo de anúncio">
+                <div className="filters-tabs hide-scrollbar" role="tablist" aria-label="Tipo de anúncio">
                   {PRIMARY_TABS.map((tab) => (
                     <button
                       key={tab.key}
                       type="button"
                       className={`filters-tab ${activeTab === tab.key ? 'is-active' : ''}`}
-                      onClick={() => setActiveTab(tab.key)}
+                      onClick={() => { setActiveTab(tab.key); setActiveSubcategory('todas') }}
                       role="tab"
                       aria-selected={activeTab === tab.key}
                     >
@@ -263,7 +274,45 @@ function Home() {
                     </button>
                   ))}
                 </div>
+
+                <div className="filters-sort-wrapper">
+                  <select
+                    className="filters-sort"
+                    value={sortOrder}
+                    onChange={(e) => setSortOrder(e.target.value)}
+                    aria-label="Ordenar produtos"
+                  >
+                    <option value="recentes">Recentes</option>
+                    <option value="preco-asc">Menor preço</option>
+                    <option value="preco-desc">Maior preço</option>
+                  </select>
+                  <svg className="filters-sort-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M7 10l5 5 5-5z" />
+                  </svg>
+                </div>
               </div>
+
+              {availableSubcategories.length > 0 && (
+                <div className="subcategories-chips hide-scrollbar" role="group" aria-label="Filtrar por subcategoria">
+                  <button
+                    type="button"
+                    className={`subcategory-chip ${activeSubcategory === 'todas' ? 'is-active' : ''}`}
+                    onClick={() => setActiveSubcategory('todas')}
+                  >
+                    Todas
+                  </button>
+                  {availableSubcategories.map((sub) => (
+                    <button
+                      key={sub}
+                      type="button"
+                      className={`subcategory-chip ${activeSubcategory === sub ? 'is-active' : ''}`}
+                      onClick={() => setActiveSubcategory(sub)}
+                    >
+                      {sub}
+                    </button>
+                  ))}
+                </div>
+              )}
             </section>
           )}
 
