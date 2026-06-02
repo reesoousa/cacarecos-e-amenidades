@@ -126,7 +126,7 @@ body.theme-atelie {
 }
 
 .store-mode-switch__indicator.is-atelie {
-  transform: translateX(calc(100% + var(--switch-pad)));
+  transform: translateX(100%);
 }
 
 .store-mode-switch__button {
@@ -335,8 +335,13 @@ body.theme-atelie {
   height: 1.05rem;
 }
 
+.skeleton-card__tags {
+  display: flex;
+  gap: 0.42rem;
+}
+
 .skeleton-card__line--tag {
-  width: 58%;
+  width: 45%;
 }
 
 .skeleton-card__line--price {
@@ -841,6 +846,15 @@ body.theme-atelie {
     margin-inline: -1rem;
     width: calc(100% + 2rem);
   }
+
+  .product-skeleton__thumbs {
+    display: none;
+  }
+
+  .product-skeleton__featured {
+    aspect-ratio: 4/3;
+    min-height: unset;
+  }
 }
 
 @media (min-width: 980px) {
@@ -1095,7 +1109,7 @@ body {
 }
 
 .store-mode-switch__indicator.is-atelie {
-  transform: translateX(calc(100% + var(--switch-pad)));
+  transform: translateX(100%);
 }
 
 .store-mode-switch__button {

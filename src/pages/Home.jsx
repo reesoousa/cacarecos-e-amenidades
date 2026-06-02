@@ -226,9 +226,11 @@ function Home() {
             <article key={`home-skeleton-${index}`} className="product-card skeleton-card">
               <Skeleton className="skeleton-card__media" />
               <div className="skeleton-card__body">
-                <Skeleton className="skeleton-card__line skeleton-card__line--category" />
                 <Skeleton className="skeleton-card__line skeleton-card__line--title" />
-                <Skeleton className="skeleton-card__line skeleton-card__line--tag" />
+                <div className="skeleton-card__tags">
+                  <Skeleton className="skeleton-card__line skeleton-card__line--tag" />
+                  <Skeleton className="skeleton-card__line skeleton-card__line--tag" />
+                </div>
                 <Skeleton className="skeleton-card__line skeleton-card__line--price" />
               </div>
             </article>
