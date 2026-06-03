@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import MobileProductWizard from '../components/MobileProductWizard'
 import Skeleton from '../components/Skeleton'
 import { supabase } from '../services/supabaseClient'
 import '../styles/admin.css'
@@ -73,11 +74,9 @@ function AdminDashboard() {
     mobile: { file: null, preview: '', existingUrl: '' },
   })
   const [bannerUploadLoading, setBannerUploadLoading] = useState({ desktop: false, mobile: false })
-  const [activeTab, setActiveTab] = useState('produtos')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState('todos')
-  const [categoryFilter, setCategoryFilter] = useState('todos')
-  const [deleteConfirmId, setDeleteConfirmId] = useState(null)
+  const [isBannerSectionOpen, setIsBannerSectionOpen] = useState(false)
+  const [isProductsSectionOpen, setIsProductsSectionOpen] = useState(false)
+  const [isFormSectionOpen, setIsFormSectionOpen] = useState(true)
 
   const getBannerPublicUrl = (fileName) => {
     const {
@@ -803,6 +802,26 @@ function AdminDashboard() {
         )}
 
       </section>
+
+      {/* FAB — visível só no mobile */}
+      <button
+        type="button"
+        className="admin-fab"
+        onClick={() => setIsMobileWizardOpen(true)}
+        aria-label="Cadastrar novo produto"
+      >
+        +
+      </button>
+
+      {isMobileWizardOpen && (
+        <MobileProductWizard
+          onClose={() => setIsMobileWizardOpen(false)}
+          onSuccess={(newProduct) => {
+            setProdutos((prev) => [newProduct, ...prev])
+            setFeedback('Produto cadastrado com sucesso.')
+          }}
+        />
+      )}
     </main>
   )
 }
