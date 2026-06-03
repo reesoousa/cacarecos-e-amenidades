@@ -5,7 +5,10 @@ import AdminDashboard from './pages/AdminDashboard'
 import Login from './pages/Login'
 import ProductDetails from './pages/ProductDetails'
 import Footer from './components/Footer'
+import CartDrawer from './components/CartDrawer'
+import { CartProvider, useCart } from './contexts/CartContext'
 import { supabase } from './services/supabaseClient'
+import './styles/cart.css'
 
 function ProtectedRoute({ children, session, isAuthLoading }) {
   if (isAuthLoading) {
@@ -45,12 +48,33 @@ function PublicOnlyRoute({ children, session, isAuthLoading }) {
   return children
 }
 
+function CartFab() {
+  const { items, openCart } = useCart()
+  const count = items.length
+  return (
+    <button
+      type="button"
+      className={`cart-fab ${count === 0 ? 'cart-fab--hidden' : ''}`}
+      onClick={openCart}
+      aria-label={`Abrir lista de interesse (${count} ${count === 1 ? 'item' : 'itens'})`}
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4ZM3 6h18M16 10a4 4 0 0 1-8 0" stroke="#03210e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      </svg>
+      <span>Minha lista</span>
+      {count > 0 && <span className="cart-fab__badge">{count}</span>}
+    </button>
+  )
+}
+
 function PublicLayout() {
   return (
-    <>
+    <CartProvider>
       <Outlet />
       <Footer />
-    </>
+      <CartDrawer />
+      <CartFab />
+    </CartProvider>
   )
 }
 
