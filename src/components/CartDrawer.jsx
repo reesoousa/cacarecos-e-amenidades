@@ -143,6 +143,9 @@ export default function CartDrawer() {
                       <img src={cover} alt={item.nome} className="cart-drawer__item-img" />
                     )}
                     <div className="cart-drawer__item-info">
+                      {item.categoria && (
+                        <span className="cart-drawer__item-category">{item.categoria}</span>
+                      )}
                       <span className="cart-drawer__item-name">{item.nome}</span>
                       <span className="cart-drawer__item-price">{getPriceLabel(item)}</span>
                     </div>
