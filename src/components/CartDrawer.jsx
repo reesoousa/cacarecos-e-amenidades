@@ -79,10 +79,9 @@ export default function CartDrawer() {
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer')
   }
 
-  const drawerStyle = {
-    transform: isOpen ? `translateY(${dragOffset}px)` : 'translateY(100%)',
-    transition: isDragging.current ? 'none' : 'transform 0.38s cubic-bezier(0.32, 0.72, 0, 1)',
-  }
+  const drawerStyle = dragOffset > 0
+    ? { transform: `translateY(${dragOffset}px)`, transition: 'none' }
+    : {}
 
   return (
     <>
@@ -96,7 +95,7 @@ export default function CartDrawer() {
       {/* Drawer */}
       <div
         ref={drawerRef}
-        className="cart-drawer"
+        className={`cart-drawer ${isOpen ? 'is-open' : ''}`}
         style={drawerStyle}
         role="dialog"
         aria-modal="true"
