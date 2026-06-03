@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import MobileProductWizard from '../components/MobileProductWizard'
 import Skeleton from '../components/Skeleton'
 import { supabase } from '../services/supabaseClient'
 import '../styles/admin.css'
@@ -62,6 +63,7 @@ function AdminDashboard() {
   const [isBannerSectionOpen, setIsBannerSectionOpen] = useState(false)
   const [isProductsSectionOpen, setIsProductsSectionOpen] = useState(false)
   const [isFormSectionOpen, setIsFormSectionOpen] = useState(true)
+  const [isMobileWizardOpen, setIsMobileWizardOpen] = useState(false)
 
   const getBannerPublicUrl = (fileName) => {
     const {
@@ -767,6 +769,26 @@ function AdminDashboard() {
           )}
         </article>
       </section>
+
+      {/* FAB — visível só no mobile */}
+      <button
+        type="button"
+        className="admin-fab"
+        onClick={() => setIsMobileWizardOpen(true)}
+        aria-label="Cadastrar novo produto"
+      >
+        +
+      </button>
+
+      {isMobileWizardOpen && (
+        <MobileProductWizard
+          onClose={() => setIsMobileWizardOpen(false)}
+          onSuccess={(newProduct) => {
+            setProdutos((prev) => [newProduct, ...prev])
+            setFeedback('Produto cadastrado com sucesso.')
+          }}
+        />
+      )}
     </main>
   )
 }
