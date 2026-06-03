@@ -77,6 +77,12 @@ function AdminDashboard() {
   const [isBannerSectionOpen, setIsBannerSectionOpen] = useState(false)
   const [isProductsSectionOpen, setIsProductsSectionOpen] = useState(false)
   const [isFormSectionOpen, setIsFormSectionOpen] = useState(true)
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState('todos')
+  const [categoryFilter, setCategoryFilter] = useState('todos')
+  const [activeTab, setActiveTab] = useState('produtos')
+  const [isMobileWizardOpen, setIsMobileWizardOpen] = useState(false)
 
   const getBannerPublicUrl = (fileName) => {
     const {
