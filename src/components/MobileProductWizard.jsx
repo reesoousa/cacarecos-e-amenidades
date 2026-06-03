@@ -18,7 +18,8 @@ const ESTADOS = ['Novo', 'Seminovo', 'Bom estado', 'Com avarias']
 const TOTAL_STEPS = 4
 
 function MobileProductWizard({ onClose, onSuccess }) {
-  const fileInputRef = useRef(null)
+  const cameraInputRef = useRef(null)
+  const galleryInputRef = useRef(null)
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState(INITIAL_FORM)
   const [images, setImages] = useState([])
@@ -46,7 +47,8 @@ function MobileProductWizard({ onClose, onSuccess }) {
       preview: URL.createObjectURL(file),
     }))
     setImages((prev) => [...prev, ...newItems])
-    if (fileInputRef.current) fileInputRef.current.value = ''
+    if (cameraInputRef.current) cameraInputRef.current.value = ''
+    if (galleryInputRef.current) galleryInputRef.current.value = ''
   }
 
   const handleRemoveImage = (id) => {
@@ -130,7 +132,7 @@ function MobileProductWizard({ onClose, onSuccess }) {
               <p className="wizard-step__hint">A primeira foto será a capa. Tire direto pela câmera ou escolha da galeria.</p>
 
               <input
-                ref={fileInputRef}
+                ref={cameraInputRef}
                 type="file"
                 accept="image/*"
                 multiple
@@ -138,10 +140,20 @@ function MobileProductWizard({ onClose, onSuccess }) {
                 onChange={handleSelectImages}
                 className="admin-file-input-hidden"
               />
+              <input
+                ref={galleryInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleSelectImages}
+                className="admin-file-input-hidden"
+              />
 
-              <button type="button" className="wizard-photo-btn" onClick={() => fileInputRef.current?.click()}>
-                <span className="wizard-photo-btn__icon">📷</span>
-                <span>{images.length === 0 ? 'Tirar ou escolher fotos' : 'Adicionar mais fotos'}</span>
+              <button type="button" className="wizard-photo-btn" onClick={() => cameraInputRef.current?.click()}>
+                <span>{images.length === 0 ? 'Tirar foto' : 'Tirar mais fotos'}</span>
+              </button>
+              <button type="button" className="wizard-photo-btn" onClick={() => galleryInputRef.current?.click()}>
+                <span>{images.length === 0 ? 'Escolher da galeria' : 'Adicionar da galeria'}</span>
               </button>
 
               {images.length > 0 && (
@@ -202,7 +214,7 @@ function MobileProductWizard({ onClose, onSuccess }) {
                       className={`wizard-chip wizard-chip--large ${formData.categoria === cat ? 'is-selected' : ''}`}
                       onClick={() => set('categoria', cat)}
                     >
-                      {cat === 'Venda' ? '🏷️ Venda' : '🎁 Doação'}
+                      {cat}
                     </button>
                   ))}
                 </div>
