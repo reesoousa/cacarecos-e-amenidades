@@ -97,6 +97,10 @@ function Home() {
   const withCacheBusting = (url) => `${url}?t=${Date.now()}`
 
   useEffect(() => {
+    document.title = 'Cacarecos & Amenidades'
+  }, [])
+
+  useEffect(() => {
     document.body.classList.toggle('theme-atelie', isAtelieMode)
 
     return () => {

@@ -57,6 +57,50 @@ function ProductDetails() {
   }, [id])
 
   useEffect(() => {
+    if (!produto) return
+
+    const priceLabel = (() => {
+      const isDoacao = produto.categoria?.toLowerCase().includes('doa')
+      const hasPrice = typeof produto.preco === 'number' && produto.preco > 0
+      if (isDoacao || !hasPrice) return 'Doação'
+      return priceFormatter.format(produto.preco)
+    })()
+
+    const description = [
+      produto.descricao?.slice(0, 120),
+      produto.estado_uso && `Estado: ${produto.estado_uso}`,
+      priceLabel,
+    ].filter(Boolean).join(' · ')
+
+    document.title = `${produto.nome} — Cacarecos & Amenidades`
+
+    const setMeta = (selector, content) => {
+      let el = document.querySelector(selector)
+      if (!el) {
+        el = document.createElement('meta')
+        const attr = selector.match(/\[(.+?)=/)?.[1]
+        const val = selector.match(/="(.+?)"/)?.[1]
+        if (attr && val) el.setAttribute(attr, val)
+        document.head.appendChild(el)
+      }
+      el.setAttribute('content', content)
+    }
+
+    setMeta('meta[name="description"]', description)
+    setMeta('meta[property="og:title"]', `${produto.nome} — Cacarecos & Amenidades`)
+    setMeta('meta[property="og:description"]', description)
+    setMeta('meta[property="og:url"]', window.location.href)
+
+    return () => {
+      document.title = 'Cacarecos & Amenidades'
+      setMeta('meta[name="description"]', 'Desapegos com afeto e peças feitas à mão. Encontre móveis, decoração, utensílios e muito mais.')
+      setMeta('meta[property="og:title"]', 'Cacarecos & Amenidades')
+      setMeta('meta[property="og:description"]', 'Desapegos com afeto e peças feitas à mão. Encontre móveis, decoração, utensílios e muito mais.')
+      setMeta('meta[property="og:url"]', 'https://www.cacarecoseamenidades.com.br')
+    }
+  }, [produto])
+
+  useEffect(() => {
     const fetchRecommendations = async () => {
       if (!produto?.id) {
         setRecommendedProducts([])
