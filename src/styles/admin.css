@@ -24,6 +24,14 @@
   padding: 1.35rem;
 }
 
+.auth-card__logo {
+  height: 36px;
+  width: auto;
+  display: block;
+  margin-bottom: 1.25rem;
+  user-select: none;
+}
+
 .auth-card__eyebrow,
 .admin-header__eyebrow {
   margin: 0;

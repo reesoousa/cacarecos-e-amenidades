@@ -916,8 +916,26 @@ body.theme-atelie {
   margin: 0 auto;
 }
 
-.site-footer h2 {
-  margin: 0;
+.site-footer__logo {
+  height: 32px;
+  width: auto;
+  display: block;
+  margin-bottom: 1rem;
+  user-select: none;
+}
+
+.site-footer__admin-link {
+  display: inline-block;
+  margin-top: 1.5rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.site-footer__admin-link:hover {
+  opacity: 1;
 }
 
 .site-footer p {

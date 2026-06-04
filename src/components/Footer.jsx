@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import logoWhiteRetangular from '../visual-id/logo-cacarecos-white-retangular.svg'
+import logoBlackRetangular from '../visual-id/logo-cacarecos-black-retangular.svg'
 
 function Footer() {
   const [isAtelieMode, setIsAtelieMode] = useState(() =>
@@ -20,15 +23,20 @@ function Footer() {
   return (
     <footer className={`site-footer ${isAtelieMode ? 'is-atelie' : ''}`} aria-label="Rodapé do projeto">
       <div className="site-footer__content">
-        <h2>Cacarecos e Amenidades</h2>
+        <img
+          src={isAtelieMode ? logoBlackRetangular : logoWhiteRetangular}
+          alt="Cacarecos & Amenidades"
+          className="site-footer__logo"
+          draggable="false"
+        />
         <p>
           Projeto criado para facilitar a reserva de itens que estamos desapegando para investir na nossa casa, no
           nosso casamento ou em mais cacarecos e amenidades.
         </p>
         <p className="site-footer__opensource">
-          Este projeto é open-source. Faça um fork em{' '}
+          Este projeto é open-source. Faça um{' '}
           <a href="https://github.com/reesoousa/cacarecos-e-amenidades" target="_blank" rel="noreferrer">
-            github.com/reesoousa/cacarecos-e-amenidades
+            fork
           </a>
           .
         </p>
@@ -53,6 +61,10 @@ function Footer() {
             LinkedIn
           </a>
         </nav>
+
+        <Link to="/login" className="site-footer__admin-link">
+          Área administrativa
+        </Link>
       </div>
     </footer>
   )

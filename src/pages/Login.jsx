@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../services/supabaseClient'
 import '../styles/admin.css'
+import logoWhiteRetangular from '../visual-id/logo-cacarecos-white-retangular.svg'
 
 function Login() {
   const navigate = useNavigate()
@@ -36,6 +37,12 @@ function Login() {
   return (
     <main className="login-page">
       <section className="auth-card" aria-label="Acesso administrativo">
+        <img
+          src={logoWhiteRetangular}
+          alt="Cacarecos & Amenidades"
+          className="auth-card__logo"
+          draggable="false"
+        />
         <p className="auth-card__eyebrow">Área Administrativa</p>
         <h1>Entrar no painel</h1>
         <p className="auth-card__subtitle">Acesse com sua conta para gerenciar os produtos cadastrados.</p>
