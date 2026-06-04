@@ -20,11 +20,16 @@ const TOTAL_STEPS = 4
 function MobileProductWizard({ onClose, onSuccess }) {
   const cameraInputRef = useRef(null)
   const galleryInputRef = useRef(null)
+  const gridRef = useRef(null)
+  const draggingIdxRef = useRef(null)
+  const dragOverIdxRef = useRef(null)
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState(INITIAL_FORM)
   const [images, setImages] = useState([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [dragActiveIdx, setDragActiveIdx] = useState(null)
+  const [dragOverIdx, setDragOverIdx] = useState(null)
 
   useEffect(() => {
     document.body.style.overflow = 'hidden'
@@ -35,6 +40,51 @@ function MobileProductWizard({ onClose, onSuccess }) {
       })
     }
   }, [])
+
+  useEffect(() => {
+    const grid = gridRef.current
+    if (!grid || images.length === 0) return
+
+    const onTouchMove = (e) => {
+      if (draggingIdxRef.current === null) return
+      e.preventDefault()
+      const touch = e.touches[0]
+      const el = document.elementFromPoint(touch.clientX, touch.clientY)
+      const thumb = el?.closest('[data-idx]')
+      if (thumb) {
+        const idx = parseInt(thumb.dataset.idx, 10)
+        dragOverIdxRef.current = idx
+        setDragOverIdx(idx)
+      }
+    }
+
+    grid.addEventListener('touchmove', onTouchMove, { passive: false })
+    return () => grid.removeEventListener('touchmove', onTouchMove)
+  }, [images.length])
+
+  const handlePhotoTouchStart = (idx) => {
+    draggingIdxRef.current = idx
+    dragOverIdxRef.current = null
+    setDragActiveIdx(idx)
+    setDragOverIdx(null)
+  }
+
+  const handlePhotoTouchEnd = () => {
+    const from = draggingIdxRef.current
+    const to = dragOverIdxRef.current
+    if (from !== null && to !== null && from !== to) {
+      setImages((prev) => {
+        const next = [...prev]
+        const [moved] = next.splice(from, 1)
+        next.splice(to, 0, moved)
+        return next
+      })
+    }
+    draggingIdxRef.current = null
+    dragOverIdxRef.current = null
+    setDragActiveIdx(null)
+    setDragOverIdx(null)
+  }
 
   const set = (field, value) => setFormData((prev) => ({ ...prev, [field]: value }))
 
@@ -129,7 +179,11 @@ function MobileProductWizard({ onClose, onSuccess }) {
           {step === 1 && (
             <div className="wizard-step">
               <h2 className="wizard-step__title">Fotos do produto</h2>
-              <p className="wizard-step__hint">A primeira foto será a capa. Tire direto pela câmera ou escolha da galeria.</p>
+              <p className="wizard-step__hint">
+                {images.length === 0
+                  ? 'A primeira foto será a capa.'
+                  : 'Arraste para reordenar. A primeira é a capa.'}
+              </p>
 
               <input
                 ref={cameraInputRef}
@@ -157,11 +211,17 @@ function MobileProductWizard({ onClose, onSuccess }) {
               </button>
 
               {images.length > 0 && (
-                <div className="wizard-photo-grid">
+                <div ref={gridRef} className="wizard-photo-grid">
                   {images.map((img, idx) => (
-                    <div key={img.id} className={`wizard-photo-thumb ${idx === 0 ? 'is-cover' : ''}`}>
+                    <div
+                      key={img.id}
+                      data-idx={idx}
+                      className={`wizard-photo-thumb${idx === 0 ? ' is-cover' : ''}${dragActiveIdx === idx ? ' is-dragging' : ''}${dragOverIdx === idx && dragActiveIdx !== idx ? ' is-drag-over' : ''}`}
+                      onTouchStart={() => handlePhotoTouchStart(idx)}
+                      onTouchEnd={handlePhotoTouchEnd}
+                    >
                       {idx === 0 && <span className="admin-image-preview__badge">Capa</span>}
-                      <img src={img.preview} alt={`Foto ${idx + 1}`} />
+                      <img src={img.preview} alt={`Foto ${idx + 1}`} draggable="false" />
                       <button type="button" className="wizard-photo-thumb__remove" onClick={() => handleRemoveImage(img.id)}>✕</button>
                     </div>
                   ))}
