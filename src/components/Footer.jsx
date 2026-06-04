@@ -34,11 +34,11 @@ function Footer() {
           nosso casamento ou em mais cacarecos e amenidades.
         </p>
         <p className="site-footer__opensource">
-          Este projeto é open-source. Faça um{' '}
+          Esse projeto é open source,{' '}
           <a href="https://github.com/reesoousa/cacarecos-e-amenidades" target="_blank" rel="noreferrer">
-            fork
+            faça um fork
           </a>
-          .
+          {' '}(:
         </p>
 
         <nav className="site-footer__social" aria-label="Links sociais">

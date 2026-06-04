@@ -412,36 +412,36 @@ body.theme-atelie {
 
 .skeleton-card__body {
   padding: 1rem;
-  display: grid;
-  gap: 0.65rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .skeleton-card__line {
-  height: 0.8rem;
-}
-
-.skeleton-card__line--category {
-  width: 38%;
+  height: 0.85rem;
+  border-radius: 6px;
 }
 
 .skeleton-card__line--title {
-  width: 72%;
-  height: 1.05rem;
+  width: 78%;
+  height: 1.1rem;
+  margin-bottom: 0.65rem;
 }
 
 .skeleton-card__tags {
   display: flex;
   gap: 0.42rem;
+  margin-bottom: 0.65rem;
 }
 
 .skeleton-card__line--tag {
-  width: 45%;
+  width: 28%;
+  height: 1.4rem;
+  border-radius: 999px;
 }
 
 .skeleton-card__line--price {
-  width: 32%;
-  height: 1rem;
-  margin-top: 0.2rem;
+  width: 36%;
+  height: 1.1rem;
 }
 
 .product-card {

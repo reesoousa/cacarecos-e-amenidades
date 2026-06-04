@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useToast } from '../contexts/ToastContext'
 import { supabase } from '../services/supabaseClient'
 
 const INITIAL_FORM = {
@@ -18,6 +19,7 @@ const ESTADOS = ['Novo', 'Seminovo', 'Bom estado', 'Com avarias']
 const TOTAL_STEPS = 4
 
 function MobileProductWizard({ onClose, onSuccess }) {
+  const { addToast } = useToast()
   const cameraInputRef = useRef(null)
   const galleryInputRef = useRef(null)
   const gridRef = useRef(null)
@@ -145,10 +147,12 @@ function MobileProductWizard({ onClose, onSuccess }) {
       const { data, error: insertError } = await supabase.from('produtos').insert(payload).select('*').single()
       if (insertError) throw new Error('Erro ao salvar produto.')
 
+      addToast('Produto cadastrado com sucesso.')
       onSuccess(data)
       onClose()
     } catch (err) {
       setError(err.message)
+      addToast(err.message, 'error')
       setIsSubmitting(false)
     }
   }

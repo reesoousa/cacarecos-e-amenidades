@@ -7,8 +7,10 @@ import ProductDetails from './pages/ProductDetails'
 import Footer from './components/Footer'
 import CartDrawer from './components/CartDrawer'
 import { CartProvider, useCart } from './contexts/CartContext'
+import { ToastProvider } from './contexts/ToastContext'
 import { supabase } from './services/supabaseClient'
 import './styles/cart.css'
+import './styles/toast.css'
 
 function ProtectedRoute({ children, session, isAuthLoading }) {
   if (isAuthLoading) {
@@ -78,6 +80,8 @@ function PublicLayout() {
   )
 }
 
+
+
 function App() {
   const [session, setSession] = useState(null)
   const [isAuthLoading, setIsAuthLoading] = useState(true)
@@ -112,29 +116,31 @@ function App() {
   }, [])
 
   return (
-    <Routes>
-      <Route element={<PublicLayout />}>
-        <Route path="/" element={<Home />} />
-        <Route path="/produto/:id" element={<ProductDetails />} />
-      </Route>
+    <ToastProvider>
+      <Routes>
+        <Route element={<PublicLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/produto/:id" element={<ProductDetails />} />
+        </Route>
 
-      <Route
-        path="/login"
-        element={
-          <PublicOnlyRoute session={session} isAuthLoading={isAuthLoading}>
-            <Login />
-          </PublicOnlyRoute>
-        }
-      />
-      <Route
-        path="/admin"
-        element={
-          <ProtectedRoute session={session} isAuthLoading={isAuthLoading}>
-            <AdminDashboard />
-          </ProtectedRoute>
-        }
-      />
-    </Routes>
+        <Route
+          path="/login"
+          element={
+            <PublicOnlyRoute session={session} isAuthLoading={isAuthLoading}>
+              <Login />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute session={session} isAuthLoading={isAuthLoading}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </ToastProvider>
   )
 }
 

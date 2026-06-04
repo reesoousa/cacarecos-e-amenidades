@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import MobileProductWizard from '../components/MobileProductWizard'
 import Skeleton from '../components/Skeleton'
+import { useToast } from '../contexts/ToastContext'
 import { supabase } from '../services/supabaseClient'
 import '../styles/admin.css'
 import logoWhiteRetangular from '../visual-id/logo-cacarecos-white-retangular.svg'
@@ -57,6 +58,7 @@ const CATEGORY_FILTERS = [
 function AdminDashboard() {
   const navigate = useNavigate()
   const fileInputRef = useRef(null)
+  const { addToast } = useToast()
 
   const [produtos, setProdutos] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -66,8 +68,6 @@ function AdminDashboard() {
   const [editingProductId, setEditingProductId] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [actionLoadingId, setActionLoadingId] = useState(null)
-  const [actionMessage, setActionMessage] = useState('')
-  const [actionMessageType, setActionMessageType] = useState('success')
   const [draggedIndex, setDraggedIndex] = useState(null)
   const [bannerImages, setBannerImages] = useState({
     desktop: { file: null, preview: '', existingUrl: '' },
@@ -133,12 +133,6 @@ function AdminDashboard() {
   }, [])
 
   useEffect(() => {
-    if (!actionMessage) return undefined
-    const timeout = setTimeout(() => setActionMessage(''), 3800)
-    return () => clearTimeout(timeout)
-  }, [actionMessage])
-
-  useEffect(() => {
     return () => {
       selectedImages.forEach((image) => {
         if (image.preview?.startsWith('blob:')) URL.revokeObjectURL(image.preview)
@@ -176,11 +170,6 @@ function AdminDashboard() {
       return true
     })
   }, [produtos, searchQuery, statusFilter, categoryFilter])
-
-  const setFeedback = (message, type = 'success') => {
-    setActionMessage(message)
-    setActionMessageType(type)
-  }
 
   const resetForm = () => {
     setFormData(INITIAL_FORM)
@@ -222,7 +211,7 @@ function AdminDashboard() {
       is_feito_a_mao: Boolean(product.is_feito_a_mao),
       dimensoes: product.dimensoes ?? '',
     })
-    setFeedback(`Editando produto: ${product.nome}`)
+    addToast(`Editando produto: ${product.nome}`)
   }
 
   const handleCancelEdit = () => {
@@ -235,10 +224,10 @@ function AdminDashboard() {
     setActionLoadingId(product.id)
     const { error: updateError } = await supabase.from('produtos').update({ status: nextStatus }).eq('id', product.id)
     if (updateError) {
-      setFeedback('Não foi possível atualizar o status do produto.', 'error')
+      addToast('Não foi possível atualizar o status do produto.', 'error')
     } else {
       setProdutos((prev) => prev.map((item) => (item.id === product.id ? { ...item, status: nextStatus } : item)))
-      setFeedback(`Status de "${product.nome}" atualizado para ${nextStatus}.`)
+      addToast(`Status de "${product.nome}" atualizado para ${nextStatus}.`)
     }
     setActionLoadingId(null)
   }
@@ -252,11 +241,11 @@ function AdminDashboard() {
     setActionLoadingId(productId)
     const { error: deleteError } = await supabase.from('produtos').delete().eq('id', productId)
     if (deleteError) {
-      setFeedback('Não foi possível excluir o produto.', 'error')
+      addToast('Não foi possível excluir o produto.', 'error')
     } else {
       setProdutos((prev) => prev.filter((item) => item.id !== productId))
       if (editingProductId === productId) resetForm()
-      setFeedback('Produto excluído com sucesso.')
+      addToast('Produto excluído com sucesso.')
     }
     setActionLoadingId(null)
   }
@@ -308,7 +297,7 @@ function AdminDashboard() {
   const handleUploadBanner = async (bannerKey) => {
     const selectedFile = bannerImages[bannerKey]?.file
     if (!selectedFile) {
-      setFeedback('Selecione uma imagem antes de salvar o banner.', 'error')
+      addToast('Selecione uma imagem antes de salvar o banner.', 'error')
       return
     }
     setBannerUploadLoading((prev) => ({ ...prev, [bannerKey]: true }))
@@ -331,7 +320,7 @@ function AdminDashboard() {
       }
     }
     if (uploadError) {
-      setFeedback(`Não foi possível salvar o ${BANNER_CONFIG[bannerKey].label.toLowerCase()}.`, 'error')
+      addToast(`Não foi possível salvar o ${BANNER_CONFIG[bannerKey].label.toLowerCase()}.`, 'error')
       setBannerUploadLoading((prev) => ({ ...prev, [bannerKey]: false }))
       return
     }
@@ -342,7 +331,7 @@ function AdminDashboard() {
       [bannerKey]: { ...prev[bannerKey], file: null, preview: '', existingUrl: refreshedUrl },
     }))
     setBannerUploadLoading((prev) => ({ ...prev, [bannerKey]: false }))
-    setFeedback(`${BANNER_CONFIG[bannerKey].label} atualizado com sucesso.`)
+    addToast(`${BANNER_CONFIG[bannerKey].label} atualizado com sucesso.`)
   }
 
   const uploadImages = async () => {
@@ -373,11 +362,10 @@ function AdminDashboard() {
   const handleSubmitProduct = async (event) => {
     event.preventDefault()
     setIsSubmitting(true)
-    setActionMessage('')
     try {
       const uploadedUrls = await uploadImages()
       if (!editingProductId && !uploadedUrls?.length) {
-        setFeedback('Selecione ao menos uma imagem para cadastrar o produto.', 'error')
+        addToast('Selecione ao menos uma imagem para cadastrar o produto.', 'error')
         setIsSubmitting(false)
         return
       }
@@ -395,12 +383,12 @@ function AdminDashboard() {
           .select('*')
           .single()
         if (updateError) {
-          setFeedback('Não foi possível atualizar o produto.', 'error')
+          addToast('Não foi possível atualizar o produto.', 'error')
           setIsSubmitting(false)
           return
         }
         setProdutos((prev) => prev.map((item) => (item.id === editingProductId ? updatedProduct : item)))
-        setFeedback('Produto atualizado com sucesso.')
+        addToast('Produto atualizado com sucesso.')
         resetForm()
         setActiveTab('produtos')
         setIsSubmitting(false)
@@ -410,15 +398,15 @@ function AdminDashboard() {
       payload.status = 'Disponível'
       const { data: insertedProduct, error: insertError } = await supabase.from('produtos').insert(payload).select('*').single()
       if (insertError) {
-        setFeedback('Produto salvo parcialmente: imagens enviadas, mas ocorreu erro ao inserir no banco.', 'error')
+        addToast('Produto salvo parcialmente: imagens enviadas, mas ocorreu erro ao inserir no banco.', 'error')
         setIsSubmitting(false)
         return
       }
       setProdutos((prev) => [insertedProduct, ...prev])
       resetForm()
-      setFeedback('Produto cadastrado com sucesso.')
+      addToast('Produto cadastrado com sucesso.')
     } catch (uploadError) {
-      setFeedback(uploadError.message, 'error')
+      addToast(uploadError.message, 'error')
     }
     setIsSubmitting(false)
   }
@@ -444,11 +432,6 @@ function AdminDashboard() {
         </button>
       </header>
 
-      {actionMessage && (
-        <p className={`admin-feedback ${actionMessageType === 'error' ? 'admin-feedback--error' : 'admin-feedback--success'}`}>
-          {actionMessage}
-        </p>
-      )}
       {error && <p className="admin-feedback admin-feedback--error">{error}</p>}
 
       {stats && (
@@ -824,7 +807,6 @@ function AdminDashboard() {
           onClose={() => setIsMobileWizardOpen(false)}
           onSuccess={(newProduct) => {
             setProdutos((prev) => [newProduct, ...prev])
-            setFeedback('Produto cadastrado com sucesso.')
           }}
         />
       )}

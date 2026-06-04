@@ -177,6 +177,7 @@ function Home() {
 
     if (sortOrder === 'preco-asc') return [...items].sort((a, b) => (a.preco ?? 0) - (b.preco ?? 0))
     if (sortOrder === 'preco-desc') return [...items].sort((a, b) => (b.preco ?? 0) - (a.preco ?? 0))
+    if (sortOrder === 'mais-vistos') return [...items].sort((a, b) => (b.view_count ?? 0) - (a.view_count ?? 0))
     return items
   }, [tabFilteredProducts, activeSubcategory, sortOrder])
 
@@ -332,7 +333,7 @@ function Home() {
                       <path d="M3 18h6v-2H3v2zm0-5h12v-2H3v2zm0-7v2h18V6H3z" />
                     </svg>
                     <span className="filters-sort-label">
-                      {sortOrder === 'recentes' ? 'Recentes' : sortOrder === 'preco-asc' ? 'Menor preço' : 'Maior preço'}
+                      {sortOrder === 'recentes' ? 'Recentes' : sortOrder === 'preco-asc' ? 'Menor preço' : sortOrder === 'preco-desc' ? 'Maior preço' : 'Mais requisitados'}
                     </span>
                   </div>
                   <select
@@ -342,6 +343,7 @@ function Home() {
                     aria-label="Ordenar produtos"
                   >
                     <option value="recentes">Recentes</option>
+                    <option value="mais-vistos">Mais requisitados</option>
                     <option value="preco-asc">Menor preço</option>
                     <option value="preco-desc">Maior preço</option>
                   </select>
